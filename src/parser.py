@@ -77,3 +77,4 @@ if __name__ == "__main__":
     text = "hello:\n\tload r1 [r2 hello]\nsub r1 11"
     p = DSPParser()
     print(p.parse(l.tokenize(text)))
+

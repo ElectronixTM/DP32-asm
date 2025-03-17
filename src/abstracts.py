@@ -26,7 +26,7 @@ class Identifier:
     #     else:
     #         self.id_ = self.get_id(name)
 
-@dataclass
+@dataclass(frozen=True)
 class MemPtr:
     reg: Register | None = None
     disp: int | Identifier | Label = 0
