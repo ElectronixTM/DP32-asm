@@ -6,7 +6,7 @@ class Register:
 
 @dataclass(frozen=True)
 class Label:
-    pass
+    name: str
 
 @dataclass
 class Identifier:
@@ -27,9 +27,15 @@ class Identifier:
     #         self.id_ = self.get_id(name)
 
 @dataclass
+class MemPtr:
+    reg: Register | None = None
+    disp: int | Identifier | Label = 0
+
+@dataclass
 class Operation:
     mnemonic: str
-    operands: list[Register | int] = field(default_factory=list)
+    operands: list[Register | int | MemPtr] = field(default_factory=list)
 
     def add_operand(self, operand: Register | int) -> None:
         self.operands.append(operand)
+

@@ -4,7 +4,8 @@ class DSPLexer(Lexer):
     tokens = {
             ID, OPCODE, REGISTER,
             LABEL, NUMBER,
-            LBRACKET, RBRACKET
+            LBRACKET, RBRACKET,
+            PLUS
             }
     ignore = ' \t\n'
     ignore_comment = r';.*'
@@ -15,8 +16,14 @@ class DSPLexer(Lexer):
         if not 1 <= int(t.value[1:]) <= 256:
             raise ValueError("Пожалуйста, исопльзуйте регистры из набора r1-r256")
         return t
-    LABEL = r'[_a-zA-Z]\w*:'
+    @_(r'[_a-zA-Z]\w*:')
+    def LABEL(self, t):
+        t.value = t.value[:-1]
+        return t
     ID = r'[_a-zA-Z]\w*'
+    LBRACKET = r'\['
+    RBRACKET = r'\]'
+    PLUS = r'\+'
 
     ID['add'] = OPCODE
     ID['sub'] = OPCODE
@@ -42,5 +49,5 @@ class DSPLexer(Lexer):
 
 if __name__ == "__main__":
     l = DSPLexer()
-    prog = "add r1 0x12"
+    prog = "[r2 + 2]"
     print(*l.tokenize(prog))
