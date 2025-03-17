@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 @dataclass(frozen=True)
 class Register:
@@ -30,6 +31,20 @@ class Identifier:
 class MemPtr:
     reg: Register | None = None
     disp: int | Identifier | Label = 0
+
+class ConditionFlags(IntFlag):
+    I = 1 << 3
+    V = 1 << 2
+    N = 1 << 1
+    Z = 1 << 0
+
+@dataclass(frozen=True)
+class Condition:
+    cond: ConditionFlags = ConditionFlags(0)
+
+    # def __init__(self, cond: int | ConditionFlags):
+    #     if isinstance(cond, int):
+    #         self.cond = ConditionFlags(cond)
 
 @dataclass
 class Operation:

@@ -60,6 +60,13 @@ class DSPParser(Parser):
     def effectively_number(self, t):
         return Identifier(t.ID)
 
+    @_("CONDITION")
+    def effectively_number(self, t):
+        print(t.CONDITION)
+        print(Condition(t.CONDITION))
+        return Condition(t.CONDITION)
+
+
     @_('OPCODE')
     def operation(self, t):
         return Operation(t.OPCODE)
@@ -74,7 +81,7 @@ class DSPParser(Parser):
 
 if __name__ == "__main__":
     l = DSPLexer()
-    text = "hello:\n\tload r1 [r2 hello]\nsub r1 11"
+    text = "branch {i=1vZ} [r11 + 5]"
     p = DSPParser()
     print(p.parse(l.tokenize(text)))
 
