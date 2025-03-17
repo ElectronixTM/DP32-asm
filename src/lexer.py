@@ -13,7 +13,7 @@ class DSPLexer(Lexer):
     # NEWLINE = r'\n+|;+'
     @_(r'r\d+')
     def REGISTER(self, t):
-        if not 1 <= int(t.value[1:]) <= 256:
+        if not 0x00 <= int(t.value[1:]) <= 0xFF:
             raise ValueError("Пожалуйста, исопльзуйте регистры из набора r1-r256")
         return t
     @_(r'[_a-zA-Z]\w*:')
