@@ -24,7 +24,7 @@ class DSPParser(Parser):
 
     @_('operation effectively_number')
     def operation(self, t):
-        t.operation.add_operand(t.NUMBER)
+        t.operation.add_operand(t.effectively_number)
         return t.operation
 
     @_("operation REGISTER")
@@ -74,6 +74,6 @@ class DSPParser(Parser):
 
 if __name__ == "__main__":
     l = DSPLexer()
-    text = "hello:\n\tload r1 [hello]"
+    text = "hello:\n\tload r1 [r2 hello]\nsub r1 11"
     p = DSPParser()
     print(p.parse(l.tokenize(text)))

@@ -8,7 +8,7 @@ class Register:
 class Label:
     name: str
 
-@dataclass
+@dataclass(frozen=True)
 class Identifier:
     name: str
     # ids: ClassVar[dict[str, int]]
