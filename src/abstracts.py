@@ -16,7 +16,7 @@ class Identifier:
 @dataclass(frozen=True)
 class MemPtr:
     reg: Register | None = None
-    disp: int | Identifier | Label = 0
+    disp: int | Identifier = 0
 
 class ConditionFlags(IntFlag):
     I = 1 << 3
