@@ -1,9 +1,9 @@
 from sly import Parser
-from lexer import DSPLexer
+from lexer import DPLexer
 from abstracts import *
 
-class DSPParser(Parser):
-    tokens = DSPLexer.tokens
+class DPParser(Parser):
+    tokens = DPLexer.tokens
 
     @_("operations_list operation")
     def operations_list(self, t):
@@ -82,8 +82,8 @@ class DSPParser(Parser):
         return [t.operation]
 
 if __name__ == "__main__":
-    l = DSPLexer()
+    l = DPLexer()
     text = "branch {i=1vZ} [r11 + 5]"
-    p = DSPParser()
+    p = DPParser()
     print(p.parse(l.tokenize(text)))
 

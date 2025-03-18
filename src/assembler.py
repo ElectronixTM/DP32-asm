@@ -96,12 +96,12 @@ class Assembler:
                 cur_addr += self._get_op_size(op)
 
 if __name__ == "__main__":
-    from lexer import DSPLexer
-    from parser import DSPParser
+    from lexer import DPLexer
+    from parser import DPParser
     a = Assembler()
     text = "add r2 r1 2"
-    l = DSPLexer()
-    p = DSPParser()
+    l = DPLexer()
+    p = DPParser()
     ast = p.parse(l.tokenize(text))
     print(ast)
     assert isinstance(ast, list) and all(isinstance(x, (Operation, Label)) for x in ast)

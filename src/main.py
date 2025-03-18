@@ -1,5 +1,7 @@
-from lexer import DSPLexer
-from parser import DSPParser
+#!/usr/bin/python3
+
+from lexer import DPLexer
+from parser import DPParser
 from assembler import Assembler
 from abstracts import Operation, Label
 from argparse import ArgumentParser
@@ -8,8 +10,8 @@ def assemble(text: str) -> bytearray:
     """
     Assembles file directly to bytecode
     """
-    l = DSPLexer()
-    p = DSPParser()
+    l = DPLexer()
+    p = DPParser()
     ast = p.parse(l.tokenize(text))
     assert isinstance(ast, list) and all(isinstance(i, (Operation, Label)) for i in ast)
     a = Assembler()

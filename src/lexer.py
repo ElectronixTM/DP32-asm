@@ -1,6 +1,6 @@
 from sly import Lexer
 
-class DSPLexer(Lexer):
+class DPLexer(Lexer):
     tokens = {
             ID, OPCODE, REGISTER,
             LABEL, NUMBER, CONDITION,
@@ -59,6 +59,6 @@ class DSPLexer(Lexer):
 
 
 if __name__ == "__main__":
-    l = DSPLexer()
+    l = DPLexer()
     prog = "branch {i=1VZ} [r2 + 1]"
     print(*l.tokenize(prog))
