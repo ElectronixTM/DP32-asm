@@ -42,17 +42,15 @@ class Command:
     _size: CommandSizes = CommandSizes.DEFAULT
 
     def to_bytearray(self) -> bytearray:
-        lower_half = (
-                (self.opcode << 24)
-                +(self.r3_or_flags << 16)
-                +(self.r1 << 8)
-                +(self.r2_or_const)
-            )
-        upper_half = self.extra
+        lower_half = bytearray([
+            self.opcode, self.r3_or_flags,
+            self.r1, self.r2_or_const
+            ])
+        upper_half = bytearray.fromhex(hex(self._extra)[2:].ljust(8, "0"))
         if self.size == CommandSizes.DEFAULT:
-            return bytearray([lower_half])
+            return lower_half
         elif self.size == CommandSizes.DOUBLED:
-            return bytearray([lower_half, upper_half])
+            return lower_half + upper_half
         else:
             raise ValueError("Wrong size specified")
             
