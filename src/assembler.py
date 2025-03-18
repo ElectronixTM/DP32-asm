@@ -18,14 +18,26 @@ class Assembler:
         """
         Выполняет двухпроходное ассемблирование того, что было подано на вход
         """
-        pass
+        self._construct_GAT(oplist)
+        code = bytearray()
+        for op in oplist:
+            if isinstance(op, Label):
+                continue
+            else:
+                command = self._assemble_operation(op)
+                code += command.to_bytearray()
+        return code
+
+    def _resolve_identifier(self, id_: Identifier) -> int:
+        return self.GAT[id_]
+
 
     def _assemble_operation(self, operation: Operation) -> Command:
         """
         Ассемблирует поданную на вход команду. Если в команде
         присутствуют идентификаторы, он пытается их разрешить
         """
-        raise NotImplementedError
+
 
     # TODO: Вероятно в будущем потребуется логика, связанная с
     # резервированием памяти. Это поменяет реализацию этой функции
@@ -61,5 +73,7 @@ if __name__ == "__main__":
     ast = p.parse(l.tokenize(text))
     print(ast)
     assert isinstance(ast, list) and all(isinstance(x, (Operation, Label)) for x in ast)
-    a._construct_GAT(ast)
+    x = a.assemble(ast)
     print(a.GAT)
+    print(x)
+
