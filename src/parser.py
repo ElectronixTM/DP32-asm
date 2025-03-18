@@ -38,6 +38,9 @@ class DSPParser(Parser):
         t.operation.add_operand(t.mem)
         return t.operation
 
+    # TODO: Я провтыкал в методичке, что при использовании обращения к памяти
+    # через такую конструкцию регистр указывать обязательно. Потом перепеши
+    # это нормально, чтобы регистр строять был обязан
     @_("LBRACKET [ REGISTER ]  [ PLUS ] [ effectively_number ] RBRACKET")
     def mem(self, t):
         regs_tuple = t[1]
