@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from abstracts import Operation, Identifier, Label
+from abstracts import Operation, Identifier, Label, Register, MemPtr
 import codegenutils
 import optable
 from command import Command
@@ -31,8 +31,14 @@ class Assembler:
     def _resolve_identifier(self, id_: Identifier) -> int:
         return self.GAT[id_]
 
-    def _resolve_identifiers(self, op: Operation) -> :
-        for operand in op.operands
+    def _resolve_identifiers(self, op: Operation) -> list[Register | int | MemPtr]:
+        result: list[Register | int | MemPtr] = []
+        for operand in op.operands:
+            if isinstance(operand, Identifier):
+                result.append(self._resolve_identifier(operand))
+            else:
+                result.append(operand)
+        return result
 
     def _assemble_operation(self, operation: Operation) -> Command:
         """
@@ -40,11 +46,19 @@ class Assembler:
         присутствуют идентификаторы, он пытается их разрешить
         """
         opdesc = self._get_op_desc(operation)
+
         # Проверке типов происходящее тут не понравится
         # Но так как opdesc и так получается на основе типов, 
         # все на самом деле должно быть хорошо
+        operands = self._resolve_identifiers(operation)
         if opdesc.oplayout == optable.OpcodeLayout.MATH:
-
+            return codegenutils.handle_math_op(opdesc.opcode, *operands)
+        elif opdesc.oplayout == optable.OpcodeLayout.MEMORY:
+            return codegenutils.handle_mem_op(opdesc.opcode, *operands)
+        elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
+            return codegenutils.handle_branch_op(opdesc.opcode, *operands)
+        else:
+            raise ValueError("Unknown layout encountered")
 
     def _get_op_desc(self, op: Operation) -> optable.OpcodeDescription:
         op_types = tuple(map(codegenutils.typedef_candidate, op.operands))
@@ -78,13 +92,12 @@ if __name__ == "__main__":
     from lexer import DSPLexer
     from parser import DSPParser
     a = Assembler()
-    text = "hello: add r2 r1 r2 hello1: sub r4 r2 r3"
+    text = "add r2 r1 2"
     l = DSPLexer()
     p = DSPParser()
     ast = p.parse(l.tokenize(text))
     print(ast)
     assert isinstance(ast, list) and all(isinstance(x, (Operation, Label)) for x in ast)
     x = a.assemble(ast)
-    print(a.GAT)
-    print(x)
+    print(x.hex())
 
