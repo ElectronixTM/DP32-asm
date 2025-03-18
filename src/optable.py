@@ -87,8 +87,9 @@ OP_TABLE: dict[str, OpTable] = {
             (Condition, I32): Desc(40, Lout.MEMORY),
             (Condition, I8): Desc(50, Lout.MEMORY),
             (Condition, LMem): Desc(41, Lout.MEMORY),
-            # conditions are effectively integers, so it's 
-            # also possible to just pass them directly
+            # Объекты условия однозначно представимы в форме
+            # 8 битного числа, поэтому я разрешаю его
+            # использование вместо объекта `Condition`
             (I8, I32): Desc(40, Lout.MEMORY),
             (I8, I8): Desc(50, Lout.MEMORY),
             (I8, LMem): Desc(41, Lout.MEMORY)
