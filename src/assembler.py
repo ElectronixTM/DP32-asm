@@ -31,13 +31,25 @@ class Assembler:
     def _resolve_identifier(self, id_: Identifier) -> int:
         return self.GAT[id_]
 
+    def _resolve_identifiers(self, op: Operation) -> :
+        for operand in op.operands
 
     def _assemble_operation(self, operation: Operation) -> Command:
         """
         Ассемблирует поданную на вход команду. Если в команде
         присутствуют идентификаторы, он пытается их разрешить
         """
+        opdesc = self._get_op_desc(operation)
+        # Проверке типов происходящее тут не понравится
+        # Но так как opdesc и так получается на основе типов, 
+        # все на самом деле должно быть хорошо
+        if opdesc.oplayout == optable.OpcodeLayout.MATH:
 
+
+    def _get_op_desc(self, op: Operation) -> optable.OpcodeDescription:
+        op_types = tuple(map(codegenutils.typedef_candidate, op.operands))
+        opdesc = optable.get_opdesc(op.mnemonic, op_types)
+        return opdesc
 
     # TODO: Вероятно в будущем потребуется логика, связанная с
     # резервированием памяти. Это поменяет реализацию этой функции
@@ -47,8 +59,7 @@ class Assembler:
         на первом проходе компилятора, когда адреса необходимо вычислить не
         проводя ассемблирование целиком
         """
-        op_types = tuple(map(codegenutils.typedef_candidate, op.operands))
-        opdesc = optable.get_opdesc(op.mnemonic, op_types)
+        opdesc= self._get_op_desc(op)
         return 2 if opdesc.expanded else 1
 
     def _construct_GAT(self, oplist: list[Operation | Label]) -> None:

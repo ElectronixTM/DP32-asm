@@ -4,7 +4,7 @@
 процессору и не затрагивает диррективы резервирования памяти
 """
 
-from abstracts import Register, Condition, Operation, Identifier, MemPtr
+from abstracts import Register, Condition, Identifier, MemPtr
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
 
