@@ -12,20 +12,6 @@ class Label:
 @dataclass(frozen=True)
 class Identifier:
     name: str
-    # ids: ClassVar[dict[str, int]]
-    #
-    # @classmethod
-    # def get_id(cls, name: str) -> int:
-    #     if name in cls.ids:
-    #         return cls.ids[name]
-    #     return max(cls.ids.values()) + 1 if len(cls.ids) > 0 else 0
-
-    # def __init__(self, name: str):
-    #     self.name = name
-    #     if name in self.ids:
-    #         self._id = self.ids[name]
-    #     else:
-    #         self.id_ = self.get_id(name)
 
 @dataclass(frozen=True)
 class MemPtr:
@@ -41,10 +27,6 @@ class ConditionFlags(IntFlag):
 @dataclass(frozen=True)
 class Condition:
     cond: ConditionFlags = ConditionFlags(0)
-
-    # def __init__(self, cond: int | ConditionFlags):
-    #     if isinstance(cond, int):
-    #         self.cond = ConditionFlags(cond)
 
 @dataclass
 class Operation:

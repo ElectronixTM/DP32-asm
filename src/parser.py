@@ -66,7 +66,6 @@ class DSPParser(Parser):
         print(Condition(t.CONDITION))
         return Condition(t.CONDITION)
 
-
     @_('OPCODE')
     def operation(self, t):
         return Operation(t.OPCODE)

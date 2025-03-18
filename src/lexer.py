@@ -60,5 +60,5 @@ class DSPLexer(Lexer):
 
 if __name__ == "__main__":
     l = DSPLexer()
-    prog = "branch {i=1VZ}"
+    prog = "branch {i=1VZ} [r2 + 1]"
     print(*l.tokenize(prog))
