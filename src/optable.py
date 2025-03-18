@@ -1,13 +1,13 @@
 """
-Файл, в котором захардкожены все опкоды, и соответствующие им операнды,
-а также добавлены несколько функций для удобства их извлечения. В целом
-наверняка между опкодами есть какие-то очевидные закономерности, которые
-позволяют не вбивать все возможности сюда, но к сожалению я их не увидел
+Файл, в котором захардкожены все опкоды, и соответствующие им операнды.
+В целом наверняка между опкодами есть какие-то очевидные закономерности,
+которые позволяют не вбивать все возможности сюда, но к сожалению я их
+не увидел. Может вы окажетесь наблюдательнее
 """
 from dataclasses import dataclass
 from enum import IntEnum, auto
 from command import *
-from abstracts import Operation, Register, Condition
+from abstracts import Register, Condition
 from typing import TypeAlias
 
 # тип данных, который для каждого отдельного типа
@@ -27,14 +27,19 @@ class OpcodeDescription:
 # несколько фиктивных типов для того, чтобы просто разделять разные опкоды
 # зависящие только от размера операнда, так как в питоне размер явно не
 # задается
-I8 = type("I8")
-I32 = type("I32")
+# I8 = type("I8", (object,), {})
+# I32 = type("I32", (object,), {})
+class I8: pass
+class I32: pass
 # LongMem - mem address with 32 bit dispp
-LMem = type("LMem")
+#LMem = type("LMem", (object,), {})
+class LMem: pass
 # ShortMem - mem address with 8 bit disp or without it
-SMem = type("LMem")
+#SMem = type("LMem", (object,), {})
+class SMem: pass
 
-OpTable: TypeAlias = dict[frozenset[type] | tuple[type, ...], OpcodeDescription]
+
+OpTable: TypeAlias = dict[tuple[type, ...], OpcodeDescription]
 
 # Чтобы это дело не растягивалось на несколько километров, создам алиасы
 Lout = OpcodeLayout
@@ -81,6 +86,7 @@ OP_TABLE: dict[str, OpTable] = {
             (Condition, I32): Desc(40, Lout.MEMORY),
             (Condition, I8): Desc(50, Lout.MEMORY),
             (Condition, LMem): Desc(41, Lout.MEMORY)
+            #? (Condition, SMem): Desc(51, Lout.MEMORY) # В описании не указан, поэтому и у меня не будет
             }
         }
 
