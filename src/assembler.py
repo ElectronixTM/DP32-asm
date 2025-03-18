@@ -28,6 +28,13 @@ class Assembler:
                 code += command.to_bytearray()
         return code
 
+    def clear(self):
+        """
+        Purges the contents of GAT. Needed if you want to assemble multiple
+        source texts with the same object
+        """
+        self.GAT = {}
+
     def _resolve_identifier(self, id_: Identifier) -> int:
         return self.GAT[id_]
 
