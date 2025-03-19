@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from abstracts import Operation, Identifier, Label, Register, MemPtr
 import codegenutils
 import optable
-from command import Command
+from command import Command, CommandSizes
 
 @dataclass
 class Assembler:
@@ -43,9 +43,41 @@ class Assembler:
         for operand in op.operands:
             if isinstance(operand, Identifier):
                 result.append(self._resolve_identifier(operand))
+            elif isinstance(operand, MemPtr) and isinstance(operand.disp, Identifier):
+                result.append(
+                        MemPtr(
+                            operand.reg,
+                            self._resolve_identifier(operand.disp)
+                            )
+                        )
             else:
                 result.append(operand)
         return result
+
+    def _codegen_mem_op(self, opcode, operands: list[Register | int | MemPtr]) -> Command:
+        """
+        Unpacks operands to fields of memory operation command. `MemPtr`
+        objects should be in their resolved form, i.e no `Identifier`
+        objects should present
+        """
+        r = None
+        mem = None
+        for op in operands:
+            if isinstance(op, Register):
+                r = op
+            elif isinstance(op, MemPtr):
+                mem = op
+        if (isinstance(r, Register)
+            and isinstance(mem, MemPtr)
+            and isinstance(mem.disp, int)):
+            return codegenutils.handle_mem_op(
+                    opcode,
+                    r,
+                    mem.reg,
+                    mem.disp,
+                    )
+        raise ValueError("Unable to construct command with given parameters")
+        
 
     def _assemble_operation(self, operation: Operation) -> Command:
         """
@@ -61,7 +93,7 @@ class Assembler:
         if opdesc.oplayout == optable.OpcodeLayout.MATH:
             return codegenutils.handle_math_op(opdesc.opcode, *operands)
         elif opdesc.oplayout == optable.OpcodeLayout.MEMORY:
-            return codegenutils.handle_mem_op(opdesc.opcode, *operands)
+            return self._codegen_mem_op(opdesc.opcode, operands)
         elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
             return codegenutils.handle_branch_op(opdesc.opcode, *operands)
         else:

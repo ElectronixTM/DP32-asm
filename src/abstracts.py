@@ -19,7 +19,7 @@ class Identifier:
 
 @dataclass(frozen=True)
 class MemPtr:
-    reg: Register | None = None
+    reg: Register
     disp: int | Identifier = 0
 
 class ConditionFlags(IntFlag):

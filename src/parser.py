@@ -41,18 +41,20 @@ class DPParser(Parser):
     # TODO: Я провтыкал в методичке, что при использовании обращения к памяти
     # через такую конструкцию регистр указывать обязательно. Потом перепеши
     # это нормально, чтобы регистр строять был обязан
-    @_("LBRACKET [ REGISTER ]  [ PLUS ] [ effectively_number ] RBRACKET")
+    @_("LBRACKET REGISTER [ PLUS ] [ effectively_number ] RBRACKET")
     def mem(self, t):
-        regs_tuple = t[1]
-        if len(regs_tuple) > 1:
-            raise ValueError("only one register can be "
-                             "used to address memory")
-        reg = regs_tuple[0]
+        reg = Register(int(t.REGISTER[1:]))
         disp_tuple = t[3]
         if len(disp_tuple) > 1:
             raise ValueError("only one number can be "
                              "used to address memory")
-        disp: int = disp_tuple[0] if disp_tuple[0] else 0
+        disp: int | Identifier = 0
+        d = disp_tuple[0]
+        if d:
+            if isinstance(d, str):
+                disp = Identifier(d)
+            else:
+                disp = d
         return MemPtr(reg, disp)
 
     @_("NUMBER")
