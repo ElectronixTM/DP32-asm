@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "dsp32-asm"
+name = "dp32-asm"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
