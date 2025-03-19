@@ -50,12 +50,14 @@ class DPParser(Parser):
                              "used to address memory")
         disp: int | Identifier = 0
         d = disp_tuple[0]
+        force_32 = False
         if d:
             if isinstance(d, str):
                 disp = Identifier(d)
+                force_32 = True
             else:
                 disp = d
-        return MemPtr(reg, disp)
+        return MemPtr(reg, disp, force_32)
 
     @_("NUMBER")
     def effectively_number(self, t):

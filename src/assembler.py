@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 from abstracts import Operation, Identifier, Label, Register, MemPtr
 import codegenutils
 import optable
-from command import Command, CommandSizes
+from command import Command, CommandSizes, MAX_FIELD_VAL
+from collections import OrderedDict
 
 @dataclass
 class Assembler:
@@ -12,7 +13,7 @@ class Assembler:
     """
     
     # Global Addresses Table
-    GAT: dict[Identifier, int] = field(default_factory=dict)
+    GAT: OrderedDict[Identifier, int] = field(default_factory=OrderedDict)
 
     def assemble(self, oplist: list[Operation | Label]) -> bytearray:
         """
@@ -33,7 +34,7 @@ class Assembler:
         Purges the contents of GAT. Needed if you want to assemble multiple
         source texts with the same object
         """
-        self.GAT = {}
+        self.GAT = OrderedDict()
 
     def _resolve_identifier(self, id_: Identifier) -> int:
         return self.GAT[id_]
@@ -47,7 +48,8 @@ class Assembler:
                 result.append(
                         MemPtr(
                             operand.reg,
-                            self._resolve_identifier(operand.disp)
+                            self._resolve_identifier(operand.disp),
+                            operand.force_32
                             )
                         )
             else:
@@ -70,11 +72,15 @@ class Assembler:
         if (isinstance(r, Register)
             and isinstance(mem, MemPtr)
             and isinstance(mem.disp, int)):
+            size = (CommandSizes.DOUBLED
+                    if mem.force_32 or mem.disp > MAX_FIELD_VAL
+                    else CommandSizes.DEFAULT)
             return codegenutils.handle_mem_op(
                     opcode,
                     r,
                     mem.reg,
                     mem.disp,
+                    size
                     )
         raise ValueError("Unable to construct command with given parameters")
         
@@ -109,7 +115,7 @@ class Assembler:
     def _get_op_size(self, op: Operation) -> int:
         """
         Получает размер инструкции, не выполняя ассемблирование. Необходим
-        на первом проходе компилятора, когда адреса необходимо вычислить не
+        на первом проходе ассемблера, когда адреса необходимо вычислить не
         проводя ассемблирование целиком
         """
         opdesc= self._get_op_desc(op)

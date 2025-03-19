@@ -21,6 +21,10 @@ class Identifier:
 class MemPtr:
     reg: Register
     disp: int | Identifier = 0
+    # Плохая практика - на стадии ассемблера мне потребовалась
+    # эта дополнительная информация, поэтому я ее захардкодил
+    # сюда. Так делать плохо, но вряд ли я переделаю
+    force_32: bool = False
 
 class ConditionFlags(IntFlag):
     I = 1 << 3
