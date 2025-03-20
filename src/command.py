@@ -46,7 +46,8 @@ class Command:
             self.opcode, self.r3_or_flags,
             self.r1, self.r2_or_const
             ])
-        upper_half = bytearray.fromhex(hex(self._extra)[2:].ljust(8, "0"))
+        upper_half = bytearray.fromhex(hex(self._extra)[2:].rjust(8, "0"))
+        print(self.size)
         if self.size == CommandSizes.DEFAULT:
             return lower_half
         elif self.size == CommandSizes.DOUBLED:
@@ -91,7 +92,7 @@ class Command:
         if not value in CommandSizes:
             raise ValueError("Inappropriate size. Should be "
                              f"32 or 64, {value} passed")
-        return self.size
+        self._size = value
     
     def _check_field_boundaries(self, value: int) -> bool:
         if not MIN_FIELD_VAL <= value <= MAX_FIELD_VAL:
