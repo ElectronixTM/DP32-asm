@@ -80,8 +80,8 @@ OP_TABLE: dict[str, OpTable] = {
             (Register, SMem): Desc(30, Lout.MEMORY)
         },
         "store": {
-            (Register, LMem): Desc(21, Lout.MEMORY, expanded=False),
-            (Register, SMem): Desc(31, Lout.MEMORY)
+            (LMem, Register): Desc(21, Lout.MEMORY, expanded=False),
+            (SMem, Register): Desc(31, Lout.MEMORY)
             },
         "branch": {
             (Condition, I32): Desc(40, Lout.MEMORY),
