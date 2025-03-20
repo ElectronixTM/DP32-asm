@@ -42,7 +42,9 @@ def test_logic_instructions(instr, expected):
 @pytest.mark.parametrize("instr,expected",
                          [
                              ("load r33 [r4 + 7]", "1e210407"),
-                             ("load r33 [r4 + 1024]", "14210400" + "400".rjust(8, "0"))
+                             ("load r33 [r4 + 1024]", "14210400" + "400".rjust(8, "0")),
+                             ("store [r4 + 7] r33", "1f210407"),
+                             ("store [r4 + 1024] r33", "15210400" + "400".rjust(8, "0"))
                          ]
                          )
 def test_unresolving_memory_instructions(instr, expected):
