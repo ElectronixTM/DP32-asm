@@ -39,7 +39,6 @@ class DPPreprocessor:
         это оформляется в класс
         """
         for token in tokens:
-            print("NEXT TOKEN:", token)
             if token.type != "PREPROC_DIRECTIVE":
                 self._resulting_tokens.append(
                         self._preprocess_token(token)
@@ -50,11 +49,10 @@ class DPPreprocessor:
                         self._directives[token.value](tokens)
                         )
             except StopIteration:
-                print(
-                    f"Preprocessing directive \"{token.value}\" couldn't "
-                    "obtain enough arguments"
-                    )
-                raise SyntaxError
+                raise SyntaxError(
+                        f"Preprocessing directive \"{token.value}\" couldn't "
+                        "obtain enough arguments"
+                        )
         return iter(self._resulting_tokens)
 
     def _preprocess_token(self, token: Token) -> Token:

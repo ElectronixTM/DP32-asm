@@ -6,8 +6,11 @@
 
 from abstracts import Register, Condition, Identifier, MemPtr, RawDataSizes
 import optable
-from command import Command, CommandSizes, MAX_FIELD_VAL
+from command import Command, CommandSizes, MAX_FIELD_VAL, MIN_FIELD_VAL
 import math
+
+def calc_raw_data_size(raw_data_size: int, data: list[int]) -> int:
+    return math.ceil(len(data) * raw_data_size / 32) 
 
 def handle_math_op(
         opcode: int,
@@ -60,9 +63,6 @@ def handle_branch_op(
         result.extra = disp
     return result
 
-def calc_raw_data_size(raw_data_size: int, data: list[int]) -> int:
-    return math.ceil(len(data) * raw_data_size / 32) 
-
 def handle_raw_data(size: RawDataSizes, data: list[int]) -> bytearray:
     """
     Записывает в память числа в Big Endian нотации, соблюдая выравнивание в 
@@ -101,7 +101,7 @@ def typedef_candidate(
 
     if not isinstance(operand, int):
         return type(operand)
-    if operand > MAX_FIELD_VAL:
+    if not MIN_FIELD_VAL <= operand <= MAX_FIELD_VAL:
         return optable.I32
     else:
         return optable.I8

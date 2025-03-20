@@ -59,7 +59,7 @@ class DPLexer(Lexer):
     ID['rel'] = REL
 
     @_(r"0x[0-9a-f]+",
-       r"\d+")
+       r"-?\d+")
     def NUMBER(self, t):
         if t.value.startswith("0x"):
             t.value = int(t.value, 16)
@@ -70,5 +70,5 @@ class DPLexer(Lexer):
 
 if __name__ == "__main__":
     l = DPLexer()
-    prog = "#define"
+    prog = "-1"
     print(*l.tokenize(prog))

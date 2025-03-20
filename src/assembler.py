@@ -5,6 +5,7 @@ import codegenutils
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
 import enum
+from hexutils import tohex
 
 class AssembleFlags(enum.Flag):
     """
@@ -68,7 +69,8 @@ class Assembler:
                     mem_ptr.reg,
                     self._resolve_identifier(mem_ptr.disp)
                     )
-        if mem_ptr.disp > MAX_FIELD_VAL:
+        # if mem_ptr.disp > MAX_FIELD_VAL:
+        if len(tohex(mem_ptr.disp, CommandSizes.DEFAULT + 8)) > 2:
             self._flags |= AssembleFlags.FORCE_EXPAND
         return mem_ptr
 

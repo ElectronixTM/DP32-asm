@@ -8,6 +8,7 @@
 from enum import IntEnum
 from dataclasses import dataclass
 from typing import Any
+from hexutils import tohex, unsigned_to_signed
 
 class CommandSizes(IntEnum):
     DEFAULT = 32
@@ -16,12 +17,14 @@ class CommandSizes(IntEnum):
 # restrictions
 POSSIBLE_OPCODES = (list(range(0, 8))
                      +[10, 11, 12, 13, 20, 21, 30, 31, 40, 41, 50])
-MIN_FIELD_VAL = 0
-MAX_FIELD_VAL = 0xFF
+MIN_FIELD_VAL = -128
+MAX_FIELD_VAL = 127
+
+REG_COUNT = 256
 
 def _set_field(attr: str):
     def set_field(self, value: int) -> None:
-        if not self._check_field_boundaries(value):
+        if not self._check_reg_index_boundaries(value):
             raise ValueError("Passed value exceeds limits. Make sure "
                              "your number in boundaries of 0 and 255")
         setattr(self, attr, value)
@@ -44,9 +47,14 @@ class Command:
     def to_bytearray(self) -> bytearray:
         lower_half = bytearray([
             self.opcode, self.r3_or_flags,
-            self.r1, self.r2_or_const
+            self.r1, self.r2_or_const & ((1 << 8) - 1)
             ])
-        upper_half = bytearray.fromhex(hex(self._extra)[2:].rjust(8, "0"))
+        upper_half = bytearray.fromhex(
+                tohex(
+                    self._extra,
+                    maxbits=32
+                    ).rjust(8, "0")
+                )
         if self.size == CommandSizes.DEFAULT:
             return lower_half
         elif self.size == CommandSizes.DOUBLED:
@@ -68,15 +76,30 @@ class Command:
                            fset=_set_field("_r3_or_flags"))
     r1 = property(fget=_get_field("_r1"),
                   fset=_set_field("_r1"))
-    r2_or_const = property(fget=_get_field("_r2_or_const"),
-                  fset=_set_field("_r2_or_const"))
+    # r2_or_const = property(fget=_get_field("_r2_or_const"),
+    #               fset=_set_field("_r2_or_const"))
+
+    @property
+    def r2_or_const(self) -> int:
+        return self._r2_or_const
+
+    @r2_or_const.setter
+    def r2_or_const(self, value: int) -> None:
+        print("value:", value)
+        if MIN_FIELD_VAL <= value <= REG_COUNT:
+            self._r2_or_const = value
+            return
+        raise ValueError("Passed value exceeds the limits for this "
+                         "field. Make sure you use numbers from "
+                         "-127 - 255 interval")
+
     @property
     def extra(self):
         return self._extra
 
     @extra.setter
     def extra(self, value: int):
-        if not 0 <= value <= 0xFFFFFFFF:
+        if len(tohex(value, CommandSizes.DEFAULT)) > 8:
             raise ValueError("Passed value exceeds limits. Make sure "
                              "your number in boundaries of 0 and "
                              "0xFFFFFFFF")
@@ -93,8 +116,8 @@ class Command:
                              f"32 or 64, {value} passed")
         self._size = value
     
-    def _check_field_boundaries(self, value: int) -> bool:
-        if not MIN_FIELD_VAL <= value <= MAX_FIELD_VAL:
+    def _check_reg_index_boundaries(self, value: int) -> bool:
+        if not 0 <= value <= REG_COUNT:
             return False
         return True
 
