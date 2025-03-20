@@ -12,7 +12,7 @@ from typing import Iterator, Callable
 
 
 @dataclass
-class Preprocessor:
+class DPPreprocessor:
     """
     Парсит набор токенов, и превращает их в другой (если
     используются директивы препроцессору) или такой же 

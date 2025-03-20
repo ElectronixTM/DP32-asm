@@ -3,7 +3,7 @@ from sly import Lexer
 class DPLexer(Lexer):
     tokens = {
             ID, OPCODE, RAW_DATA,
-            REGISTER,
+            REGISTER, REL,
             LABEL, NUMBER, CONDITION,
             LBRACKET, RBRACKET, PLUS,
             PREPROC_DIRECTIVE # директива препроцессору
@@ -56,6 +56,7 @@ class DPLexer(Lexer):
     ID['db'] = RAW_DATA
     ID['dh'] = RAW_DATA
     ID['dw'] = RAW_DATA
+    ID['rel'] = REL
 
     @_(r"0x[0-9a-f]+",
        r"\d+")

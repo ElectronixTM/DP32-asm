@@ -3,7 +3,7 @@
 после завершения стадии синтаксического анализа
 """
 from dataclasses import dataclass, field
-from enum import IntFlag, IntEnum
+from enum import IntFlag, Flag, IntEnum, auto
 
 @dataclass(frozen=True)
 class Register:
@@ -13,9 +13,17 @@ class Register:
 class Label:
     name: str
 
+class IdFlags(Flag):
+    REL_ADDR = auto()
+
 @dataclass(frozen=True)
 class Identifier:
     name: str
+    flags: IdFlags = field(
+            default=IdFlags(0),
+            compare=False,
+            hash=False
+            )
 
 @dataclass(frozen=True)
 class MemPtr:

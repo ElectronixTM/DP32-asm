@@ -74,6 +74,13 @@ class DPParser(Parser):
     def effectively_number(self, t):
         return t.NUMBER
 
+    @_("REL ID")
+    def effectively_number(self, t):
+        return Identifier(
+                t.ID,
+                IdFlags.REL_ADDR
+                )
+
     @_("ID")
     def effectively_number(self, t):
         return Identifier(t.ID)

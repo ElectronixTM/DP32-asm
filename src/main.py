@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from lexer import DPLexer
+from preprocessor import DPPreprocessor
 from parser import DPParser
 from assembler import Assembler
 from abstracts import Operation, Label, RawData
@@ -12,7 +13,12 @@ def assemble(text: str) -> bytearray:
     """
     l = DPLexer()
     p = DPParser()
-    ast = p.parse(l.tokenize(text))
+    preproc = DPPreprocessor()
+    ast = p.parse(
+            preproc.preprocess(
+                l.tokenize(text)
+                )
+            )
     assert (isinstance(ast, list)
             and all(isinstance(i, (Operation, Label, RawData)) for i in ast))
     a = Assembler()

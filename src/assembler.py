@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from abstracts import Operation, Identifier, Label, Register, MemPtr, RawData
+from abstracts import (Operation, Identifier, Label,
+                       Register, MemPtr, RawData, IdFlags)
 import codegenutils
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
@@ -21,7 +22,8 @@ class Assembler:
     
     # Global Addresses Table
     GAT: dict[Identifier, int] = field(default_factory=dict)
-    flags: AssembleFlags = AssembleFlags(0)
+    _flags: AssembleFlags = AssembleFlags(0)
+    _cur_addr: int = 0
 
     def assemble(self, oplist: list[Operation | Label | RawData]) -> bytearray:
         """
@@ -37,6 +39,8 @@ class Assembler:
             else:
                 command = self._assemble_operation(op)
                 code += command.to_bytearray()
+            self._cur_addr = len(code) // 4
+
         return code
 
     def clear(self):
@@ -45,10 +49,13 @@ class Assembler:
         source texts with the same object
         """
         self.GAT = {}
-        self.flags = AssembleFlags(0)
+        self._flags = AssembleFlags(0)
+        self._cur_addr = 0
 
     def _resolve_identifier(self, id_: Identifier) -> int:
-        return self.GAT[id_]
+        if not IdFlags.REL_ADDR in id_.flags:
+            return self.GAT[id_]
+        return self.GAT[id_] - self._cur_addr
 
     def _resolve_mem_ptr(self, mem_ptr: MemPtr) -> MemPtr:
         """
@@ -56,13 +63,13 @@ class Assembler:
         этом проставляя флаги ассемблирования
         """
         if isinstance(mem_ptr.disp, Identifier):
-            self.flags |= AssembleFlags.FORCE_EXPAND
+            self._flags |= AssembleFlags.FORCE_EXPAND
             return MemPtr(
                     mem_ptr.reg,
                     self._resolve_identifier(mem_ptr.disp)
                     )
         if mem_ptr.disp > MAX_FIELD_VAL:
-            self.flags |= AssembleFlags.FORCE_EXPAND
+            self._flags |= AssembleFlags.FORCE_EXPAND
         return mem_ptr
 
 
@@ -71,7 +78,7 @@ class Assembler:
         for operand in op.operands:
             print(operand)
             if isinstance(operand, Identifier):
-                self.flags |= AssembleFlags.FORCE_EXPAND
+                self._flags |= AssembleFlags.FORCE_EXPAND
                 result.append(self._resolve_identifier(operand))
             elif isinstance(operand, MemPtr):
                 result.append(self._resolve_mem_ptr(operand))
@@ -96,9 +103,9 @@ class Assembler:
             and isinstance(mem, MemPtr)
             and isinstance(mem.disp, int)):
             size = (CommandSizes.DOUBLED
-                    if AssembleFlags.FORCE_EXPAND in self.flags
+                    if AssembleFlags.FORCE_EXPAND in self._flags
                     else CommandSizes.DEFAULT)
-            print(self.flags)
+            print(self._flags)
             return codegenutils.handle_mem_op(
                     opcode,
                     r,
@@ -114,7 +121,7 @@ class Assembler:
         Ассемблирует поданную на вход команду. Если в команде
         присутствуют идентификаторы, он пытается их разрешить
         """
-        self.flags = AssembleFlags(0)
+        self._flags = AssembleFlags(0)
         opdesc = self._get_op_desc(operation)
 
         # Проверке типов происходящее тут не понравится
@@ -127,7 +134,7 @@ class Assembler:
             return self._codegen_mem_op(opdesc.opcode, operands)
         elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
             size = (CommandSizes.DOUBLED
-                    if AssembleFlags.FORCE_EXPAND in self.flags
+                    if AssembleFlags.FORCE_EXPAND in self._flags
                     else CommandSizes.DOUBLED)
             return codegenutils.handle_branch_op(opdesc.opcode, *operands, size=size)
         else:
