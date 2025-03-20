@@ -3,7 +3,14 @@ from abstracts import Operation, Identifier, Label, Register, MemPtr
 import codegenutils
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
-from collections import OrderedDict
+import enum
+
+class AssembleFlags(enum.Flag):
+    """
+    Хранит информацию для ассемблера для отдельной команды.
+    Должны сбрасываться после окончания ассемблирования отдельной команды
+    """
+    FORCE_EXPAND = enum.auto()
 
 @dataclass
 class Assembler:
@@ -13,7 +20,8 @@ class Assembler:
     """
     
     # Global Addresses Table
-    GAT: OrderedDict[Identifier, int] = field(default_factory=OrderedDict)
+    GAT: dict[Identifier, int] = field(default_factory=dict)
+    flags: AssembleFlags = AssembleFlags(0)
 
     def assemble(self, oplist: list[Operation | Label]) -> bytearray:
         """
@@ -34,24 +42,37 @@ class Assembler:
         Purges the contents of GAT. Needed if you want to assemble multiple
         source texts with the same object
         """
-        self.GAT = OrderedDict()
+        self.GAT = {}
+        self.flags = AssembleFlags(0)
 
     def _resolve_identifier(self, id_: Identifier) -> int:
         return self.GAT[id_]
 
+    def _resolve_mem_ptr(self, mem_ptr: MemPtr) -> MemPtr:
+        """
+        Разрешает MemPtr, если есть необходимость, при
+        этом проставляя флаги ассемблирования
+        """
+        if isinstance(mem_ptr.disp, Identifier):
+            self.flags |= AssembleFlags.FORCE_EXPAND
+            return MemPtr(
+                    mem_ptr.reg,
+                    self._resolve_identifier(mem_ptr.disp)
+                    )
+        if mem_ptr.disp > MAX_FIELD_VAL:
+            self.flags |= AssembleFlags.FORCE_EXPAND
+        return mem_ptr
+
+
     def _resolve_identifiers(self, op: Operation) -> list[Register | int | MemPtr]:
         result: list[Register | int | MemPtr] = []
         for operand in op.operands:
+            print(operand)
             if isinstance(operand, Identifier):
+                self.flags |= AssembleFlags.FORCE_EXPAND
                 result.append(self._resolve_identifier(operand))
-            elif isinstance(operand, MemPtr) and isinstance(operand.disp, Identifier):
-                result.append(
-                        MemPtr(
-                            operand.reg,
-                            self._resolve_identifier(operand.disp),
-                            operand.force_32
-                            )
-                        )
+            elif isinstance(operand, MemPtr):
+                result.append(self._resolve_mem_ptr(operand))
             else:
                 result.append(operand)
         return result
@@ -73,8 +94,9 @@ class Assembler:
             and isinstance(mem, MemPtr)
             and isinstance(mem.disp, int)):
             size = (CommandSizes.DOUBLED
-                    if mem.force_32 or mem.disp > MAX_FIELD_VAL
+                    if AssembleFlags.FORCE_EXPAND in self.flags
                     else CommandSizes.DEFAULT)
+            print(self.flags)
             return codegenutils.handle_mem_op(
                     opcode,
                     r,
@@ -90,6 +112,7 @@ class Assembler:
         Ассемблирует поданную на вход команду. Если в команде
         присутствуют идентификаторы, он пытается их разрешить
         """
+        self.flags = AssembleFlags(0)
         opdesc = self._get_op_desc(operation)
 
         # Проверке типов происходящее тут не понравится
@@ -101,7 +124,10 @@ class Assembler:
         elif opdesc.oplayout == optable.OpcodeLayout.MEMORY:
             return self._codegen_mem_op(opdesc.opcode, operands)
         elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
-            return codegenutils.handle_branch_op(opdesc.opcode, *operands)
+            size = (CommandSizes.DOUBLED
+                    if AssembleFlags.FORCE_EXPAND in self.flags
+                    else CommandSizes.DOUBLED)
+            return codegenutils.handle_branch_op(opdesc.opcode, *operands, size=size)
         else:
             raise ValueError("Unknown layout encountered")
 
