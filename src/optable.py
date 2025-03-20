@@ -48,52 +48,52 @@ Desc = OpcodeDescription
 
 OP_TABLE: dict[str, OpTable] = {
         "add": {
-            (Register, Register, Register): Desc(0, Lout.MATH),
-            (Register, Register, I8): Desc(10, Lout.MATH)
+            (Register, Register, Register): Desc(0x0, Lout.MATH),
+            (Register, Register, I8): Desc(0x10, Lout.MATH)
             },
         "sub": {
-            (Register, Register, Register): Desc(1, Lout.MATH),
-            (Register, Register, I8): Desc(11, Lout.MATH)
+            (Register, Register, Register): Desc(0x1, Lout.MATH),
+            (Register, Register, I8): Desc(0x11, Lout.MATH)
             },
         "mul": {
-            (Register, Register, Register): Desc(2, Lout.MATH),
-            (Register, Register, I8): Desc(12, Lout.MATH)
+            (Register, Register, Register): Desc(0x2, Lout.MATH),
+            (Register, Register, I8): Desc(0x12, Lout.MATH)
             },
         "div": {
-            (Register, Register, Register): Desc(3, Lout.MATH),
-            (Register, Register, I8): Desc(13, Lout.MATH)
+            (Register, Register, Register): Desc(0x3, Lout.MATH),
+            (Register, Register, I8): Desc(0x13, Lout.MATH)
             },
         "and": {
-            (Register, Register, Register): Desc(4, Lout.MATH),
+            (Register, Register, Register): Desc(0x4, Lout.MATH),
             },
         "or": {
-            (Register, Register, Register): Desc(5, Lout.MATH),
+            (Register, Register, Register): Desc(0x5, Lout.MATH),
             },
         "xor": {
-            (Register, Register, Register): Desc(6, Lout.MATH),
+            (Register, Register, Register): Desc(0x6, Lout.MATH),
             },
         "mask": {
-            (Register, Register, Register): Desc(7, Lout.MATH),
+            (Register, Register, Register): Desc(0x7, Lout.MATH),
             },
         "load": {
-            (Register, LMem): Desc(20, Lout.MEMORY, expanded=True),
-            (Register, SMem): Desc(30, Lout.MEMORY)
+            (Register, LMem): Desc(0x20, Lout.MEMORY, expanded=True),
+            (Register, SMem): Desc(0x30, Lout.MEMORY)
         },
         "store": {
-            (LMem, Register): Desc(21, Lout.MEMORY, expanded=False),
-            (SMem, Register): Desc(31, Lout.MEMORY)
+            (LMem, Register): Desc(0x21, Lout.MEMORY, expanded=False),
+            (SMem, Register): Desc(0x31, Lout.MEMORY)
             },
         "branch": {
-            (Condition, I32): Desc(40, Lout.MEMORY),
-            (Condition, I8): Desc(50, Lout.MEMORY),
-            (Condition, LMem): Desc(41, Lout.MEMORY),
+            (Condition, I32): Desc(0x40, Lout.MEMORY),
+            (Condition, I8): Desc(0x50, Lout.MEMORY),
+            (Condition, LMem): Desc(0x41, Lout.MEMORY),
             # Объекты условия однозначно представимы в форме
             # 8 битного числа, поэтому я разрешаю его
             # использование вместо объекта `Condition`
-            (I8, I32): Desc(40, Lout.MEMORY),
-            (I8, I8): Desc(50, Lout.MEMORY),
-            (I8, LMem): Desc(41, Lout.MEMORY)
-            #? (Condition, SMem): Desc(51, Lout.MEMORY) В описании
+            (I8, I32): Desc(0x40, Lout.MEMORY),
+            (I8, I8): Desc(0x50, Lout.MEMORY),
+            (I8, LMem): Desc(0x41, Lout.MEMORY)
+            #? (Condition, SMem): Desc(0x51, Lout.MEMORY) В описании
             # не указан, поэтому и у меня не будет
             }
         }

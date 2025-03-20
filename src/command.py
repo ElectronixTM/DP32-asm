@@ -15,8 +15,8 @@ class CommandSizes(IntEnum):
     DOUBLED = 64
 
 # restrictions
-POSSIBLE_OPCODES = (list(range(0, 8))
-                     +[10, 11, 12, 13, 20, 21, 30, 31, 40, 41, 50])
+POSSIBLE_OPCODES = (list(range(0x0, 0x8))
+                     +[0x10, 0x11, 0x12, 0x13, 0x20, 0x21, 0x30, 0x31, 0x40, 0x41, 0x50])
 MIN_FIELD_VAL = -128
 MAX_FIELD_VAL = 127
 
