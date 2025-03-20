@@ -5,12 +5,17 @@ class DPLexer(Lexer):
             ID, OPCODE, RAW_DATA,
             REGISTER,
             LABEL, NUMBER, CONDITION,
-            LBRACKET, RBRACKET, PLUS
+            LBRACKET, RBRACKET, PLUS,
+            PREPROC_DIRECTIVE # директива препроцессору
             }
     ignore = ' \t\n'
     ignore_comment = r';.*'
 
-    # NEWLINE = r'\n+|;+'
+    @_(r"#\w*")
+    def PREPROC_DIRECTIVE(self, t):
+        t.value = t.value[1:]
+        return t
+
     @_(r'r\d+')
     def REGISTER(self, t):
         if not 0x00 <= int(t.value[1:]) <= 0xFF:
@@ -64,5 +69,5 @@ class DPLexer(Lexer):
 
 if __name__ == "__main__":
     l = DPLexer()
-    prog = "branch {i=1VZ} [r2 + 1]"
+    prog = "#define"
     print(*l.tokenize(prog))
