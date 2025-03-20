@@ -16,6 +16,12 @@ class DPParser(Parser):
         t.operations_list.append(t.operation)
         return t.operations_list
 
+    @_("operations_list data")
+    def operations_list(self, t):
+        t.operations_list.append(t.data)
+        return t.operations_list
+
+
     @_("operations_list LABEL")
     def operations_list(self, t):
         l = Label(t.LABEL)
@@ -103,17 +109,18 @@ class DPParser(Parser):
     def data(self, t):
         return RawData(DATA_SIZES_TABLE[t.RAW_DATA])
 
-    @_("operation")
-    def operations_list(self, t):
-        return [t.operation]
-
     @_("data")
     def operations_list(self, t):
         return [t.data]
 
+    @_("operation")
+    def operations_list(self, t):
+        return [t.operation]
+
+
 if __name__ == "__main__":
     l = DPLexer()
-    text = "db 12 12 33"
+    text = "x: db 12 12 33"
     p = DPParser()
     print(p.parse(l.tokenize(text)))
 

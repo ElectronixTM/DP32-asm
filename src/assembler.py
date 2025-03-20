@@ -78,7 +78,6 @@ class Assembler:
     def _resolve_identifiers(self, op: Operation) -> list[Register | int | MemPtr]:
         result: list[Register | int | MemPtr] = []
         for operand in op.operands:
-            print(operand)
             if isinstance(operand, Identifier):
                 self._flags |= AssembleFlags.FORCE_EXPAND
                 result.append(self._resolve_identifier(operand))
@@ -107,7 +106,6 @@ class Assembler:
             size = (CommandSizes.DOUBLED
                     if AssembleFlags.FORCE_EXPAND in self._flags
                     else CommandSizes.DEFAULT)
-            print(self._flags)
             return codegenutils.handle_mem_op(
                     opcode,
                     r,
