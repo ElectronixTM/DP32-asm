@@ -3,7 +3,7 @@
 from lexer import DPLexer
 from parser import DPParser
 from assembler import Assembler
-from abstracts import Operation, Label
+from abstracts import Operation, Label, RawData
 from argparse import ArgumentParser
 
 def assemble(text: str) -> bytearray:
@@ -13,7 +13,8 @@ def assemble(text: str) -> bytearray:
     l = DPLexer()
     p = DPParser()
     ast = p.parse(l.tokenize(text))
-    assert isinstance(ast, list) and all(isinstance(i, (Operation, Label)) for i in ast)
+    assert (isinstance(ast, list)
+            and all(isinstance(i, (Operation, Label, RawData)) for i in ast))
     a = Assembler()
     return a.assemble(ast)
 

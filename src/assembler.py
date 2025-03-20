@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from abstracts import Operation, Identifier, Label, Register, MemPtr
+from abstracts import Operation, Identifier, Label, Register, MemPtr, RawData
 import codegenutils
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
@@ -23,7 +23,7 @@ class Assembler:
     GAT: dict[Identifier, int] = field(default_factory=dict)
     flags: AssembleFlags = AssembleFlags(0)
 
-    def assemble(self, oplist: list[Operation | Label]) -> bytearray:
+    def assemble(self, oplist: list[Operation | Label | RawData]) -> bytearray:
         """
         Выполняет двухпроходное ассемблирование того, что было подано на вход
         """
@@ -32,6 +32,8 @@ class Assembler:
         for op in oplist:
             if isinstance(op, Label):
                 continue
+            elif isinstance(op, RawData):
+                code += codegenutils.handle_raw_data(op.size, op.operands)
             else:
                 command = self._assemble_operation(op)
                 code += command.to_bytearray()
@@ -147,7 +149,13 @@ class Assembler:
         opdesc= self._get_op_desc(op)
         return 2 if opdesc.expanded else 1
 
-    def _construct_GAT(self, oplist: list[Operation | Label]) -> None:
+    def _get_raw_data_size(self, raw_data: RawData):
+        return codegenutils.calc_raw_data_size(
+                raw_data.size,
+                raw_data.operands
+                )
+
+    def _construct_GAT(self, oplist: list[Operation | Label | RawData]) -> None:
         """
         Вызывается при первом проходе ассемблера по файлу - составляет
         таблицу переводов идентификаторов в адреса в памяти
@@ -156,6 +164,8 @@ class Assembler:
         for op in oplist:
             if isinstance(op, Label):
                 self.GAT[Identifier(op.name)] = cur_addr
+            elif isinstance(op, RawData):
+                cur_addr += self._get_raw_data_size(op)
             else:
                 cur_addr += self._get_op_size(op)
 

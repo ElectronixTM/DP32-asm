@@ -2,7 +2,8 @@ from sly import Lexer
 
 class DPLexer(Lexer):
     tokens = {
-            ID, OPCODE, REGISTER,
+            ID, OPCODE, RAW_DATA,
+            REGISTER,
             LABEL, NUMBER, CONDITION,
             LBRACKET, RBRACKET, PLUS
             }
@@ -47,6 +48,9 @@ class DPLexer(Lexer):
     ID['load'] = OPCODE
     ID['store'] = OPCODE
     ID['branch'] = OPCODE
+    ID['db'] = RAW_DATA
+    ID['dh'] = RAW_DATA
+    ID['dw'] = RAW_DATA
 
     @_(r"0x[0-9a-f]+",
        r"\d+")

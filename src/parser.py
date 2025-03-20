@@ -2,6 +2,12 @@ from sly import Parser
 from lexer import DPLexer
 from abstracts import *
 
+DATA_SIZES_TABLE: dict[str, RawDataSizes] = {
+        "db": RawDataSizes.BYTE,
+        "dh": RawDataSizes.HALFWORD,
+        "dw": RawDataSizes.WORD
+        }
+
 class DPParser(Parser):
     tokens = DPLexer.tokens
 
@@ -21,6 +27,11 @@ class DPParser(Parser):
     #    id_ = Identifier(t.ID)
     #    t.operation.add_operand(id_)
     #    return t.operation
+
+    @_('data NUMBER')
+    def data(self, t):
+        t.data.add_operand(t.NUMBER)
+        return t.data
 
     @_('operation effectively_number')
     def operation(self, t):
@@ -81,13 +92,21 @@ class DPParser(Parser):
     def operations_list(self, t):
         return [Label(t.LABEL)]
 
+    @_("RAW_DATA")
+    def data(self, t):
+        return RawData(DATA_SIZES_TABLE[t.RAW_DATA])
+
     @_("operation")
     def operations_list(self, t):
         return [t.operation]
 
+    @_("data")
+    def operations_list(self, t):
+        return [t.data]
+
 if __name__ == "__main__":
     l = DPLexer()
-    text = "branch {i=1vZ} [r11 + 5]"
+    text = "db 12 12 33"
     p = DPParser()
     print(p.parse(l.tokenize(text)))
 

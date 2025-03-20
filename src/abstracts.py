@@ -3,7 +3,7 @@
 после завершения стадии синтаксического анализа
 """
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import IntFlag, IntEnum
 
 @dataclass(frozen=True)
 class Register:
@@ -35,6 +35,19 @@ class ConditionFlags(IntFlag):
 @dataclass(frozen=True)
 class Condition:
     cond: ConditionFlags = ConditionFlags(0)
+
+class RawDataSizes(IntEnum):
+    BYTE = 8
+    HALFWORD = 16
+    WORD = 32
+
+@dataclass
+class RawData:
+    size: RawDataSizes
+    operands: list[int] = field(default_factory=list)
+
+    def add_operand(self, operand: int):
+        self.operands.append(operand)
 
 @dataclass
 class Operation:

@@ -4,9 +4,10 @@
 процессору и не затрагивает диррективы резервирования памяти
 """
 
-from abstracts import Register, Condition, Identifier, MemPtr
+from abstracts import Register, Condition, Identifier, MemPtr, RawDataSizes
 import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
+import math
 
 def handle_math_op(
         opcode: int,
@@ -58,6 +59,28 @@ def handle_branch_op(
     if size == CommandSizes.DOUBLED:
         result.extra = disp
     return result
+
+def calc_raw_data_size(raw_data_size: int, data: list[int]) -> int:
+    return math.ceil(len(data) * raw_data_size / 32) 
+
+def handle_raw_data(size: RawDataSizes, data: list[int]) -> bytearray:
+    """
+    Записывает в память числа в Big Endian нотации, соблюдая выравнивание в 
+    32 бита, для того, чтобы не сбивалось чтение
+    """
+    # Максимальная длина хекса для этого размера
+    max_hex_size = (size // 8) * 2
+    result = bytearray()
+    for number in data:
+        hex_repr = hex(number)[2:].rjust(max_hex_size, "0")
+        if len(hex_repr) > max_hex_size:
+            raise ValueError(f"Number {number} from param `data` exceeds "
+                             "limits for the given size ({size} bits)")
+        print(hex_repr)
+        result += bytearray.fromhex(hex_repr)
+    # До скольки надо добить нулями итоговый массив
+    adjust = calc_raw_data_size(size, data) * 4
+    return result.ljust(adjust, b'\x00')
 
 def typedef_candidate(
         operand: Register | int | Condition | MemPtr | Identifier
