@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from abstracts import (Operation, Identifier, Label,
+from abstracts import (Operation, Identifier, Label, Condition,
                        Register, MemPtr, RawData, IdFlags)
 import codegenutils
 import optable
@@ -75,8 +75,11 @@ class Assembler:
         return mem_ptr
 
 
-    def _resolve_identifiers(self, op: Operation) -> list[Register | int | MemPtr]:
-        result: list[Register | int | MemPtr] = []
+    def _resolve_identifiers(
+            self,
+            op: Operation
+            ) -> list[Register | int | MemPtr | Condition]:
+        result: list[Register | int | MemPtr | Condition] = []
         for operand in op.operands:
             if isinstance(operand, Identifier):
                 self._flags |= AssembleFlags.FORCE_EXPAND
@@ -87,7 +90,11 @@ class Assembler:
                 result.append(operand)
         return result
 
-    def _codegen_mem_op(self, opcode, operands: list[Register | int | MemPtr]) -> Command:
+    def _codegen_mem_op(
+            self,
+            opcode,
+            operands: list[Register | int | MemPtr | Condition]
+            ) -> Command:
         """
         Unpacks operands to fields of memory operation command. `MemPtr`
         objects should be in their resolved form, i.e no `Identifier`
@@ -114,7 +121,38 @@ class Assembler:
                     size
                     )
         raise ValueError("Unable to construct command with given parameters")
-        
+
+    def _codegen_branch_op(
+            self,
+            opcode,
+            operands: list[Register | int | MemPtr | Condition]
+            ) -> Command:
+            size = (CommandSizes.DOUBLED
+                    if AssembleFlags.FORCE_EXPAND in self._flags
+                    else CommandSizes.DEFAULT)
+            codegenutils.handle_branch_op
+            ivnz = None
+            reg = None
+            disp = None
+            for op in operands:
+                if isinstance(op, Condition):
+                    ivnz = op
+                if isinstance(op, int):
+                    disp = op
+                if isinstance(op, MemPtr):
+                    reg = op.reg
+                    disp = op.disp
+            if (isinstance(ivnz, Condition)
+                and isinstance(disp, int)):
+                print(disp)
+                return codegenutils.handle_branch_op(
+                        opcode,
+                        ivnz,
+                        reg,
+                        disp,
+                        size
+                        )
+            raise ValueError("Unable to construct branch command with given parameters")
 
     def _assemble_operation(self, operation: Operation) -> Command:
         """
@@ -136,7 +174,7 @@ class Assembler:
             size = (CommandSizes.DOUBLED
                     if AssembleFlags.FORCE_EXPAND in self._flags
                     else CommandSizes.DOUBLED)
-            return codegenutils.handle_branch_op(opdesc.opcode, *operands, size=size)
+            return self._codegen_branch_op(opdesc.opcode, operands)
         else:
             raise ValueError("Unknown layout encountered")
 

@@ -60,8 +60,13 @@ class RawData:
 @dataclass
 class Operation:
     mnemonic: str
-    operands: list[Register | int | Identifier | MemPtr] = field(default_factory=list)
+    operands: list[Register | int |
+                   Identifier | MemPtr |
+                   Condition] = field(default_factory=list)
 
-    def add_operand(self, operand: Register | int) -> None:
+    def add_operand(
+            self,
+            operand: Register | int | Identifier | MemPtr | Condition
+            ) -> None:
         self.operands.append(operand)
 
