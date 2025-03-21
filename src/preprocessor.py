@@ -61,14 +61,16 @@ class DPPreprocessor:
         сильно усложнена, но так как на данный момент пользователю
         доступны лишь #define и #undefine, сойдет и так
         """
-        if token.type != "ID":
-            return token
+        # if token.type != "ID" and token.type != "LABEL":
+        #     return token
         if token.value not in self._preprocessing_table:
             return token
         substitution = self._preprocessing_table[token.value]
+        if token.type != "ID":
+            token.value = substitution
+            return token
         if isinstance(substitution, int):
             token.type = "NUMBER"
-        token.value = substitution
         return token
 
     def _invoke_directive_handler(
@@ -96,9 +98,9 @@ class DPPreprocessor:
 
 if __name__ == "__main__":
     l = DPLexer()
-    text = "#define x 0x20 add r1 r2 x"
+    text = "#define x hello x: 0x20 add r1 r2 x"
     tokens = l.tokenize(text)
     # print(*tokens)
-    prep = Preprocessor()
+    prep = DPPreprocessor()
     print(*prep.preprocess(tokens))
     print(prep._preprocessing_table)
