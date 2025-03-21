@@ -21,6 +21,13 @@ class DPParser(Parser):
         t.operations_list.append(t.data)
         return t.operations_list
 
+    # Такая затычка канает только потому
+    # что я предполагаю наличие препроцессора
+    # и считаю, что директив последнему не
+    # останется в итоговом потоке токенов
+    @_("operations_list empty")
+    def operations_list(self, t):
+        return t.operations_list
 
     @_("operations_list LABEL")
     def operations_list(self, t):
@@ -93,8 +100,6 @@ class DPParser(Parser):
 
     @_("CONDITION")
     def effectively_number(self, t):
-        print(t.CONDITION)
-        print(Condition(t.CONDITION))
         return Condition(t.CONDITION)
 
     @_('OPCODE')
@@ -116,6 +121,10 @@ class DPParser(Parser):
     @_("operation")
     def operations_list(self, t):
         return [t.operation]
+
+    @_("PREPROC_DIRECTIVE")
+    def empty(self, t):
+        pass
 
 
 if __name__ == "__main__":

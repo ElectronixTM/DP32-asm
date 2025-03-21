@@ -144,7 +144,6 @@ class Assembler:
                     disp = op.disp
             if (isinstance(ivnz, Condition)
                 and isinstance(disp, int)):
-                print(disp)
                 return codegenutils.handle_branch_op(
                         opcode,
                         ivnz,

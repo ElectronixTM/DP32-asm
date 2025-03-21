@@ -85,7 +85,6 @@ class Command:
 
     @r2_or_const.setter
     def r2_or_const(self, value: int) -> None:
-        print("value:", value)
         if MIN_FIELD_VAL <= value <= REG_COUNT:
             self._r2_or_const = value
             return

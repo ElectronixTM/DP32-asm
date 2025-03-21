@@ -78,7 +78,6 @@ def handle_raw_data(size: RawDataSizes, data: list[int]) -> bytearray:
         if len(hex_repr) > max_hex_size:
             raise ValueError(f"Number {number} from param `data` exceeds "
                              "limits for the given size ({size} bits)")
-        print(hex_repr)
         result += bytearray.fromhex(hex_repr)
     # До скольки надо добить нулями итоговый массив
     adjust = calc_raw_data_size(size, data) * 4
