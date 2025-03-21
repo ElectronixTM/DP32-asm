@@ -27,6 +27,8 @@ def test_absolute_addr(source, index, expected):
 
 @pytest.mark.parametrize("source,index,expected",
                          [
+                             ("y: load r1 [r1 + rel x] x: store [r2 + x] r1", 1*4, "00000002"),
+                             ("y: load r1 [r1 + rel x] x: store [r2 + rel y] r1", 3*4, "fffffffe"),
                              ("dw" + " 0" * 12 + " store [r25 + rel x] r2 "
                               "dw" + " 0" * 4 + " x: dw 0xff 0xff",
                               13*4, "00000005"),
