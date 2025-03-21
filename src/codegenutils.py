@@ -61,6 +61,8 @@ def handle_branch_op(
         result.r1 = r1.index
     if size == CommandSizes.DOUBLED:
         result.extra = disp
+    else:
+        result.r2_or_const = disp
     return result
 
 def handle_raw_data(size: RawDataSizes, data: list[int]) -> bytearray:
