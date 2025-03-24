@@ -1,4 +1,5 @@
 from sly import Lexer
+from sly.lex import Token
 
 class DPLexer(Lexer):
     tokens = {
@@ -6,7 +7,8 @@ class DPLexer(Lexer):
             REGISTER, REL,
             LABEL, NUMBER, CONDITION,
             LBRACKET, RBRACKET, PLUS,
-            PREPROC_DIRECTIVE # директива препроцессору
+            PREPROC_DIRECTIVE, # директива препроцессору
+            ERROR
             }
     ignore = ' \t\n'
     ignore_comment = r';.*'
@@ -67,8 +69,22 @@ class DPLexer(Lexer):
             t.value = int(t.value)
         return t
 
+    def error(self, t: Token):
+        line: str = self.text.split('\n')[t.lineno - 1]
+        error_tok = t.value.split()[0]
+        print(f"Unexpected token {error_tok} appeared on line {t.lineno}")
+        print(line)
+        print(
+                " "*line.index(t.value) 
+                + "^"*len(error_tok)
+             )
+        self.index += len(error_tok)
+        print("note, that preprocessor substitutes only identifiers")
+        t.value = error_tok
+        return t
+
 
 if __name__ == "__main__":
     l = DPLexer()
-    prog = "-1"
+    prog = "12 ** 7 2 ?? 3 4 5"
     print(*l.tokenize(prog))

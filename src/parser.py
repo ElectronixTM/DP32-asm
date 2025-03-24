@@ -122,14 +122,29 @@ class DPParser(Parser):
     def operations_list(self, t):
         return [t.operation]
 
-    @_("PREPROC_DIRECTIVE")
+    @_("PREPROC_DIRECTIVE",
+       "ERROR")
     def empty(self, t):
         pass
 
+    def error(self, token):
+        if not token:
+            print("Unexpected EOF while parsing")
+            return
+
+        print(f"Parser encountered syntax error on line {token.lineno} "
+              f"at index {token.index}")
+        print(f"Bad token \"{token.value}\" of type {token.type}")
+
+        RESET_ON = ("OPCODE", "LABEL", "RAW_DATA")
+        while tok := next(self.tokens, None):
+            if tok.type in RESET_ON:
+                break
+        self.restart()
 
 if __name__ == "__main__":
     l = DPLexer()
-    text = "x: db 12 12 33"
+    text = "db c 12 d add [r1 + *] db d"
     p = DPParser()
     print(p.parse(l.tokenize(text)))
 
