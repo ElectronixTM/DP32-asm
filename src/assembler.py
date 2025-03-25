@@ -6,6 +6,7 @@ import optable
 from command import Command, CommandSizes, MAX_FIELD_VAL
 import enum
 from hexutils import tohex
+import errorwatcher
 
 class AssembleFlags(enum.Flag):
     """
@@ -30,17 +31,20 @@ class Assembler:
         """
         Выполняет двухпроходное ассемблирование того, что было подано на вход
         """
-        self._construct_GAT(oplist)
         code = bytearray()
+        self._construct_GAT(oplist)
         for op in oplist:
-            if isinstance(op, Label):
-                continue
-            elif isinstance(op, RawData):
-                code += codegenutils.handle_raw_data(op.size, op.operands)
-            else:
-                command = self._assemble_operation(op)
-                code += command.to_bytearray()
-            self._cur_addr = len(code) // 4
+            try:
+                if isinstance(op, Label):
+                    continue
+                elif isinstance(op, RawData):
+                    code += codegenutils.handle_raw_data(op.size, op.operands)
+                else:
+                    command = self._assemble_operation(op)
+                    code += command.to_bytearray()
+                self._cur_addr = len(code) // 4
+            except Exception as e:
+                raise errorwatcher.TrackedError(op, e)
 
         return code
 
@@ -206,18 +210,21 @@ class Assembler:
         """
         cur_addr = 0
         for op in oplist:
-            if isinstance(op, Label):
-                self.GAT[Identifier(op.name)] = cur_addr
-            elif isinstance(op, RawData):
-                cur_addr += self._get_raw_data_size(op)
-            else:
-                cur_addr += self._get_op_size(op)
+            try:
+                if isinstance(op, Label):
+                    self.GAT[Identifier(op.name)] = cur_addr
+                elif isinstance(op, RawData):
+                    cur_addr += self._get_raw_data_size(op)
+                else:
+                    cur_addr += self._get_op_size(op)
+            except Exception as e:
+                raise errorwatcher.TrackedError(op, e)
 
 if __name__ == "__main__":
     from lexer import DPLexer
     from parser import DPParser
     a = Assembler()
-    text = "add r2 r1 2"
+    text = "add r2 2"
     l = DPLexer()
     p = DPParser()
     ast = p.parse(l.tokenize(text))

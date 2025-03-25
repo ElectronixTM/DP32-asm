@@ -4,6 +4,7 @@
 """
 from dataclasses import dataclass, field
 from enum import IntFlag, Flag, IntEnum, auto
+import errorwatcher
 
 @dataclass(frozen=True)
 class Register:
@@ -49,6 +50,7 @@ class RawDataSizes(IntEnum):
     HALFWORD = 16
     WORD = 32
 
+@errorwatcher.tracked
 @dataclass
 class RawData:
     size: RawDataSizes
@@ -57,6 +59,7 @@ class RawData:
     def add_operand(self, operand: int):
         self.operands.append(operand)
 
+@errorwatcher.tracked
 @dataclass
 class Operation:
     mnemonic: str
@@ -70,3 +73,6 @@ class Operation:
             ) -> None:
         self.operands.append(operand)
 
+
+if __name__ == "__main__":
+    print(type(Operation))

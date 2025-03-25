@@ -1,6 +1,8 @@
 from sly import Parser
 from lexer import DPLexer
 from abstracts import *
+from sly.yacc import YaccProduction
+from errorwatcher import ErrorWatcher
 
 DATA_SIZES_TABLE: dict[str, RawDataSizes] = {
         "db": RawDataSizes.BYTE,
@@ -103,8 +105,14 @@ class DPParser(Parser):
         return Condition(t.CONDITION)
 
     @_('OPCODE')
-    def operation(self, t):
-        return Operation(t.OPCODE)
+    def operation(self, t: YaccProduction):
+        op = Operation(t.OPCODE)
+        ErrorWatcher().update_info(
+                op._id,
+                lineno=t.lineno,
+                index=t.index
+                )
+        return op
 
     @_('LABEL')
     def operations_list(self, t):
@@ -112,7 +120,13 @@ class DPParser(Parser):
 
     @_("RAW_DATA")
     def data(self, t):
-        return RawData(DATA_SIZES_TABLE[t.RAW_DATA])
+        rd = RawData(DATA_SIZES_TABLE[t.RAW_DATA])
+        ErrorWatcher().update_info(
+                rd._id,
+                lineno=t.lineno,
+                index=t.index
+                )
+        return rd
 
     @_("data")
     def operations_list(self, t):
@@ -144,7 +158,8 @@ class DPParser(Parser):
 
 if __name__ == "__main__":
     l = DPLexer()
-    text = "db c 12 d add [r1 + *] db d"
+    text = "db 1 2 3 add 1"
     p = DPParser()
     print(p.parse(l.tokenize(text)))
+    print(ErrorWatcher().tracked_table)
 

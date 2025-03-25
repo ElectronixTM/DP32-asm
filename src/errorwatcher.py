@@ -5,6 +5,7 @@
 
 from dataclasses import dataclass
 from typing import Any
+from functools import wraps
 
 # @dataclasses(frozen=True)
 # class TrackedError(Exception):
@@ -13,15 +14,25 @@ from typing import Any
 
 @dataclass
 class TrackedInfo:
+    """
+    Информация о том, в какой строке и в каком месте
+    было инициировано создание объекта, а также
+    опциональная ссылка на сам объект
+    """
     lineno: int
     index: int
     obj: Any = None
+
+@dataclass
+class TrackedError(Exception):
+    failed_on: Any
+    prev_exception: Exception | None = None
 
 
 class ErrorWatcher:
     """
     Синглтон класс, хранящий отладочную информацию о расположении
-    того ассемблерного текста, который породил данный объект
+    того ассемблерного текста, который породил какой-то объект
     """
     instance: "ErrorWatcher"
 
@@ -34,6 +45,9 @@ class ErrorWatcher:
         if not hasattr(self, "tracked_table"):
             self.tracked_table: dict[int, TrackedInfo] = {}
 
+    def report_error(self, error):
+        pass
+    
     def get_id(self) -> int:
         id_ = 0
         while id_ in self.tracked_table:
@@ -79,15 +93,20 @@ class ErrorWatcher:
         if id_ in self.tracked_table:
             del self.tracked_table[id_]
 
-def tracked(cls: type) -> type:
+    def drop_obj(self, obj: Any):
+        if hasattr(obj, "_id"):
+            self.drop_by_id(obj._id)
+
+def tracked(cls: type):
     """
     Декоратор для классов, который модифицирует метод __new__ таким образом
-    чтобы при вызове в ErrorWatcher добавлялся уникальный id
+    чтобы при вызове в ErrorWatcher добавлялся уникальный id. Учтите, что этот
+    декоратор следует в общем случае вешать на класс последним в иерархии
     """
     old_init = cls.__init__
     def init(self: Any, *args, **kwargs) -> None:
         old_init(self, *args, **kwargs)
-        id_ = ErrorWatcher().get_id()
+        id_: int = ErrorWatcher().get_id()
         if hasattr(self, "_id"):
             raise AttributeError("Looks like class "
                                  f"\"{self.__class__.__name__}\" "
@@ -98,21 +117,3 @@ def tracked(cls: type) -> type:
     cls.__init__ = init
     return cls
 
-@tracked
-@dataclass
-class Test:
-    t: int
-
-if __name__ == "__main__":
-    e1 = ErrorWatcher()
-    print(e1.tracked_table)
-    Test(2)
-    print(e1.tracked_table)
-    e2 = ErrorWatcher()
-    print(e2.tracked_table)
-#     print(e1.tracked_table)
-#     e2 = ErrorWatcher()
-#     print(e1.tracked_table)
-#     e3 = ErrorWatcher()
-#     print(e1.tracked_table)
-# 
