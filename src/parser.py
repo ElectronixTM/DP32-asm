@@ -146,8 +146,7 @@ class DPParser(Parser):
             print("Unexpected EOF while parsing")
             return
 
-        print(f"Parser encountered syntax error on line {token.lineno} "
-              f"at index {token.index}")
+        print(f"Parser encountered syntax error on line {token.lineno}")
         print(f"Bad token \"{token.value}\" of type {token.type}")
 
         RESET_ON = ("OPCODE", "LABEL", "RAW_DATA")
