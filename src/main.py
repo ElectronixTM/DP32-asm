@@ -11,12 +11,13 @@ from errorwatcher import TrackedErrorsList, TrackedError, ErrorWatcher
 def report_error(error: TrackedError, source: str):
     error_watcher = ErrorWatcher()
     location = error_watcher.get_info_by_id(error.failed_on._id)
-    line = source.split('\n')[location.lineno-1]
+    lines = source.split('\n')
+    line = lines[location.lineno-1]
+    err_index: int = location.index - len("\n".join(lines[:location.lineno-1]) + '\n')
     print(f"Error accured on line {location.lineno} "
-          f"at index {location.index}:")
+          f"at index {location.index}. Started from:")
     print("\t"+line)
-    print("\t"+" "*location.index + "^")
-    print("Started from here")
+    print("\t"+" "*err_index + "^")
     print("[ERROR MSG]:", error.msg, end="\n\n")
 
 def report_errors_list(errors: TrackedErrorsList, source: str):
@@ -84,11 +85,11 @@ def main():
         result = assemble(text)
     except TrackedError as e:
         report_error(e, text)
-        print("Couldn't finish assembling due to the error")
+        print("Couldn't perform assembling due to the error")
         return
     except TrackedErrorsList as e:
         report_errors_list(e, text)
-        print("Couldn't finish assembling due to listed errors")
+        print("Couldn't perform assembling due to listed errors")
         return
     except Exception as e:
         print(e)

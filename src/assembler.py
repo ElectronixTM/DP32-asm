@@ -203,7 +203,7 @@ class Assembler:
         except KeyError as e:
             error = errorwatcher.TrackedError(
                     op,
-                    "Can't find valid opcode instruction"
+                    "Can't find valid opcode instruction "
                     f"'{op.mnemonic}' with given parameters",
                     e)
         if error: raise error
@@ -243,7 +243,6 @@ class Assembler:
                 else:
                     cur_addr += self._get_op_size(op)
             except errorwatcher.TrackedError as e:
-                print("TRACKED")
                 errors.append(
                         errorwatcher.TrackedError(
                             e.failed_on,
@@ -253,7 +252,6 @@ class Assembler:
                             )
                         )
             except Exception as e:
-                print("UNTRACKED")
                 error = errorwatcher.TrackedError(
                         op,
                         "Couldn't resolve size of given instruction",

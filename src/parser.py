@@ -158,7 +158,7 @@ class DPParser(Parser):
 
 if __name__ == "__main__":
     l = DPLexer()
-    text = "db 1 2 3 add 1"
+    text = "db 1 2 3\nadd 1"
     p = DPParser()
     print(p.parse(l.tokenize(text)))
     print(ErrorWatcher().tracked_table)
