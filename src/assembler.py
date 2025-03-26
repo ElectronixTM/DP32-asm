@@ -26,13 +26,26 @@ class Assembler:
     GAT: dict[Identifier, int] = field(default_factory=dict)
     _flags: AssembleFlags = AssembleFlags(0)
     _cur_addr: int = 0
+    # # Текущая ассемблируемая сущность. Нужна для отладки, чтобы прокидывать, от чего
+    # # успел отъехать ассемблер. Далее это будет передано при формировании сообщения
+    # # об ошибке
+    # _cur_entity: Operation | RawData | None = None
 
     def assemble(self, oplist: list[Operation | Label | RawData]) -> bytearray:
         """
         Выполняет двухпроходное ассемблирование того, что было подано на вход
         """
+        errors_list = errorwatcher.TrackedErrorsList(
+                "errors occured while assembling instructions"
+                )
         code = bytearray()
-        self._construct_GAT(oplist)
+        try:
+            self._construct_GAT(oplist)
+        except errorwatcher.TrackedErrorsList as e:
+            errors_list.exceptions.extend(e.exceptions)
+        except errorwatcher.TrackedError as e:
+            errors_list.exceptions.append(e)
+
         for op in oplist:
             try:
                 if isinstance(op, Label):
@@ -43,8 +56,11 @@ class Assembler:
                     command = self._assemble_operation(op)
                     code += command.to_bytearray()
                 self._cur_addr = len(code) // 4
-            except Exception as e:
-                raise errorwatcher.TrackedError(op, e)
+            except errorwatcher.TrackedError as e:
+                errors_list.exceptions.append(e)
+
+        if len(errors_list.exceptions) > 0:
+            raise errors_list
 
         return code
 
@@ -174,16 +190,24 @@ class Assembler:
         elif opdesc.oplayout == optable.OpcodeLayout.MEMORY:
             return self._codegen_mem_op(opdesc.opcode, operands)
         elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
-            size = (CommandSizes.DOUBLED
-                    if AssembleFlags.FORCE_EXPAND in self._flags
-                    else CommandSizes.DOUBLED)
             return self._codegen_branch_op(opdesc.opcode, operands)
         else:
             raise ValueError("Unknown layout encountered")
 
     def _get_op_desc(self, op: Operation) -> optable.OpcodeDescription:
+        error = None
         op_types = tuple(map(codegenutils.typedef_candidate, op.operands))
-        opdesc = optable.get_opdesc(op.mnemonic, op_types)
+        opdesc: optable.OpcodeDescription | None = None
+        try:
+            opdesc = optable.get_opdesc(op.mnemonic, op_types)
+        except KeyError as e:
+            error = errorwatcher.TrackedError(
+                    op,
+                    "Can't find valid opcode instruction"
+                    f"'{op.mnemonic}' with given parameters",
+                    e)
+        if error: raise error
+        assert isinstance(opdesc, optable.OpcodeDescription)
         return opdesc
 
     # TODO: Вероятно в будущем потребуется логика, связанная с
@@ -194,7 +218,7 @@ class Assembler:
         на первом проходе ассемблера, когда адреса необходимо вычислить не
         проводя ассемблирование целиком
         """
-        opdesc= self._get_op_desc(op)
+        opdesc = self._get_op_desc(op)
         return 2 if opdesc.expanded else 1
 
     def _get_raw_data_size(self, raw_data: RawData):
@@ -208,6 +232,7 @@ class Assembler:
         Вызывается при первом проходе ассемблера по файлу - составляет
         таблицу переводов идентификаторов в адреса в памяти
         """
+        errors: list[errorwatcher.TrackedError] = []
         cur_addr = 0
         for op in oplist:
             try:
@@ -217,8 +242,29 @@ class Assembler:
                     cur_addr += self._get_raw_data_size(op)
                 else:
                     cur_addr += self._get_op_size(op)
+            except errorwatcher.TrackedError as e:
+                print("TRACKED")
+                errors.append(
+                        errorwatcher.TrackedError(
+                            e.failed_on,
+                            msg="Couldn't determine size of operand "
+                                'due to: "' + e.msg + '"',
+                            prev_exception=e.prev_exception
+                            )
+                        )
             except Exception as e:
-                raise errorwatcher.TrackedError(op, e)
+                print("UNTRACKED")
+                error = errorwatcher.TrackedError(
+                        op,
+                        "Couldn't resolve size of given instruction",
+                        e
+                        )
+                errors.append(error)
+        if len(errors) != 0:
+            raise errorwatcher.TrackedErrorsList(
+                    "Errors occured while trying to determine operations sizes",
+                    errors
+                    )
 
 if __name__ == "__main__":
     from lexer import DPLexer

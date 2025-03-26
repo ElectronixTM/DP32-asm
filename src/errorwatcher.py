@@ -3,14 +3,9 @@
 о месте, в котором был найден и построен `tracked` класс
 """
 
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, TypeVar, Callable, Sequence
 from functools import wraps
-
-# @dataclasses(frozen=True)
-# class TrackedError(Exception):
-    
-
 
 @dataclass
 class TrackedInfo:
@@ -23,11 +18,16 @@ class TrackedInfo:
     index: int
     obj: Any = None
 
-@dataclass
+@dataclass(frozen=True)
 class TrackedError(Exception):
     failed_on: Any
+    msg: str = ""
     prev_exception: Exception | None = None
 
+@dataclass
+class TrackedErrorsList(Exception):
+    text: str = ""
+    exceptions: list[TrackedError] = field(default_factory=list)
 
 class ErrorWatcher:
     """
@@ -44,9 +44,6 @@ class ErrorWatcher:
     def __init__(self):
         if not hasattr(self, "tracked_table"):
             self.tracked_table: dict[int, TrackedInfo] = {}
-
-    def report_error(self, error):
-        pass
     
     def get_id(self) -> int:
         id_ = 0
@@ -97,14 +94,16 @@ class ErrorWatcher:
         if hasattr(obj, "_id"):
             self.drop_by_id(obj._id)
 
-def tracked(cls: type):
+
+T = TypeVar("T")
+def tracked(cls: type[T]) -> type[T]:
     """
     Декоратор для классов, который модифицирует метод __new__ таким образом
     чтобы при вызове в ErrorWatcher добавлялся уникальный id. Учтите, что этот
     декоратор следует в общем случае вешать на класс последним в иерархии
     """
-    old_init = cls.__init__
-    def init(self: Any, *args, **kwargs) -> None:
+    old_init: Callable[..., None] = cls.__init__
+    def init(self: T, *args, **kwargs) -> None:
         old_init(self, *args, **kwargs)
         id_: int = ErrorWatcher().get_id()
         if hasattr(self, "_id"):

@@ -10,8 +10,12 @@ class DPLexer(Lexer):
             PREPROC_DIRECTIVE, # директива препроцессору
             ERROR
             }
-    ignore = ' \t\n'
+    ignore = ' \t'
     ignore_comment = r';.*'
+
+    @_("\n+")
+    def ignore_newline(self, t):
+        self.lineno += len(t.value)
 
     @_(r"#\w*")
     def PREPROC_DIRECTIVE(self, t):
@@ -21,7 +25,7 @@ class DPLexer(Lexer):
     @_(r'r\d+')
     def REGISTER(self, t):
         if not 0x00 <= int(t.value[1:]) <= 0xFF:
-            raise ValueError("Пожалуйста, исопльзуйте регистры из набора r1-r256")
+            raise ValueError("Please, user register from the pool of r1-r256")
         return t
     @_(r'[_a-zA-Z]\w*:')
     def LABEL(self, t):
@@ -70,12 +74,15 @@ class DPLexer(Lexer):
         return t
 
     def error(self, t: Token):
-        line: str = self.text.split('\n')[t.lineno - 1]
+        lines = self.text.split('\n')
+        line: str = lines[t.lineno - 1]
+        print(lines)
+        err_index: int = t.index - len("\n".join(lines[:t.lineno-1]) + '\n')
         error_tok = t.value.split()[0]
         print(f"Unexpected token {error_tok} appeared on line {t.lineno}")
         print(line)
         print(
-                " "*line.index(t.value) 
+                " "*err_index
                 + "^"*len(error_tok)
              )
         self.index += len(error_tok)

@@ -6,6 +6,23 @@ from parser import DPParser
 from assembler import Assembler
 from abstracts import Operation, Label, RawData
 from argparse import ArgumentParser
+from errorwatcher import TrackedErrorsList, TrackedError, ErrorWatcher
+
+def report_error(error: TrackedError, source: str):
+    error_watcher = ErrorWatcher()
+    location = error_watcher.get_info_by_id(error.failed_on._id)
+    line = source.split('\n')[location.lineno-1]
+    print(f"Error accured on line {location.lineno} "
+          f"at index {location.index}:")
+    print("\t"+line)
+    print("\t"+" "*location.index + "^")
+    print("Started from here")
+    print("[ERROR MSG]:", error.msg, end="\n\n")
+
+def report_errors_list(errors: TrackedErrorsList, source: str):
+    print(errors.text.center(40, "_"))
+    for error in errors.exceptions:
+        report_error(error, source)
 
 def assemble(text: str) -> bytearray:
     """
@@ -19,6 +36,8 @@ def assemble(text: str) -> bytearray:
                 l.tokenize(text)
                 )
             )
+    if not ast:
+        raise ValueError("Syntax analysis failed. Aborting assembling stage")
     assert (isinstance(ast, list)
             and all(isinstance(i, (Operation, Label, RawData)) for i in ast))
     a = Assembler()
@@ -60,7 +79,20 @@ def main():
 
     with open(args.file, 'r') as f:
         text = f.read()
-    result = assemble(text)
+    result = None
+    try:
+        result = assemble(text)
+    except TrackedError as e:
+        report_error(e, text)
+        print("Couldn't finish assembling due to the error")
+        return
+    except TrackedErrorsList as e:
+        report_errors_list(e, text)
+        print("Couldn't finish assembling due to listed errors")
+        return
+    except Exception as e:
+        print(e)
+        return
     if args.format == "bin":
         with open(args.output, 'wb') as f:
             f.write(result)
