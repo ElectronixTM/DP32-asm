@@ -51,6 +51,12 @@ class Assembler:
                 if isinstance(op, Label):
                     continue
                 elif isinstance(op, RawData):
+                    op.operands = self._resolve_data_identifiers(op)
+                    if AssembleFlags.FORCE_EXPAND in self._flags and op.size != 32:
+                        raise errorwatcher.TrackedError(
+                                op,
+                                f"Can't fit 32 bits identifier to {op.size} bits"
+                                )
                     code += codegenutils.handle_raw_data(op.size, op.operands)
                 else:
                     command = self._assemble_operation(op)
@@ -94,6 +100,25 @@ class Assembler:
             self._flags |= AssembleFlags.FORCE_EXPAND
         return mem_ptr
 
+    def _resolve_data_identifiers(
+            self,
+            data: RawData
+            ) -> list[int]:
+        result = []
+        for op in data.operands:
+            if isinstance(op, Identifier):
+                result.append(self._resolve_identifier(op))
+                self._flags |= AssembleFlags.FORCE_EXPAND
+            elif isinstance(op, Condition):
+                result.append(op.cond)
+            elif isinstance(op, int):
+                result.append(op)
+            else:
+                raise errorwatcher.TrackedError(
+                        data,
+                        "Unexpected argument for data reserving instruction"
+                        )
+        return result
 
     def _resolve_identifiers(
             self,

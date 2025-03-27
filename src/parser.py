@@ -43,9 +43,9 @@ class DPParser(Parser):
     #    t.operation.add_operand(id_)
     #    return t.operation
 
-    @_('data NUMBER')
+    @_('data effectively_number')
     def data(self, t):
-        t.data.add_operand(t.NUMBER)
+        t.data.add_operand(t.effectively_number)
         return t.data
 
     @_('operation effectively_number')

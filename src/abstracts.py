@@ -54,7 +54,7 @@ class RawDataSizes(IntEnum):
 @dataclass
 class RawData:
     size: RawDataSizes
-    operands: list[int] = field(default_factory=list)
+    operands: list[int | Condition | Identifier] = field(default_factory=list)
 
     def add_operand(self, operand: int):
         self.operands.append(operand)
