@@ -84,17 +84,17 @@ OP_TABLE: dict[str, OpTable] = {
             (SMem, Register): Desc(0x31, Lout.MEMORY)
             },
         "branch": {
-            (Condition, I32): Desc(0x40, Lout.BRANCHING),
+            (Condition, I32): Desc(0x40, Lout.BRANCHING, expanded=True),
             (Condition, I8): Desc(0x50, Lout.BRANCHING),
-            (Condition, LMem): Desc(0x41, Lout.BRANCHING),
-            (Condition, SMem): Desc(0x41, Lout.BRANCHING, expanded=True),
+            (Condition, LMem): Desc(0x41, Lout.BRANCHING, expanded=True),
+            (Condition, SMem): Desc(0x41, Lout.BRANCHING),
             # Объекты условия однозначно представимы в форме
             # 8 битного числа, поэтому я разрешаю его
             # использование вместо объекта `Condition`
-            (I8, I32): Desc(0x40, Lout.BRANCHING),
+            (I8, I32): Desc(0x40, Lout.BRANCHING, expanded=True),
             (I8, I8): Desc(0x50, Lout.BRANCHING),
-            (I8, LMem): Desc(0x41, Lout.BRANCHING),
-            (I8, SMem): Desc(0x41, Lout.BRANCHING, expanded = True)
+            (I8, LMem): Desc(0x41, Lout.BRANCHING, expanded=True),
+            (I8, SMem): Desc(0x41, Lout.BRANCHING)
             #? (Condition, SMem): Desc(0x51, Lout.BRANCHING) В описании
             # не указан, поэтому и у меня не будет
             }
