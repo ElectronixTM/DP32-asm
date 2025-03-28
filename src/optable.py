@@ -80,7 +80,7 @@ OP_TABLE: dict[str, OpTable] = {
             (Register, SMem): Desc(0x30, Lout.MEMORY)
         },
         "store": {
-            (LMem, Register): Desc(0x21, Lout.MEMORY, expanded=False),
+            (LMem, Register): Desc(0x21, Lout.MEMORY, expanded=True),
             (SMem, Register): Desc(0x31, Lout.MEMORY)
             },
         "branch": {
