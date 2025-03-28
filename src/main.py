@@ -55,7 +55,7 @@ def bytearray_to_lab(barr: bytearray) -> str:
                    + command[:2].hex()
                    + "_"
                    + command[2:].hex()
-                   + '"\n')
+                   + '",\n')
     return result
 
 def main():
