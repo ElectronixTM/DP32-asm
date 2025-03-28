@@ -78,6 +78,9 @@ class DPParser(Parser):
         d = disp_tuple[0]
         force_32 = False
         if d:
+            if isinstance(d, Identifier):
+                disp = d
+                force_32 = True
             if isinstance(d, str):
                 disp = Identifier(d)
                 force_32 = True
