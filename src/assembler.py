@@ -175,7 +175,6 @@ class Assembler:
             size = (CommandSizes.DOUBLED
                     if AssembleFlags.FORCE_EXPAND in self._flags
                     else CommandSizes.DEFAULT)
-            codegenutils.handle_branch_op
             ivnz = None
             reg = None
             disp = None
@@ -215,6 +214,8 @@ class Assembler:
         elif opdesc.oplayout == optable.OpcodeLayout.MEMORY:
             return self._codegen_mem_op(opdesc.opcode, operands)
         elif opdesc.oplayout == optable.OpcodeLayout.BRANCHING:
+            if opdesc.expanded:
+                self._flags |= AssembleFlags.FORCE_EXPAND
             return self._codegen_branch_op(opdesc.opcode, operands)
         else:
             raise ValueError("Unknown layout encountered")
