@@ -1,6 +1,6 @@
 [project]
 name = "dp32-asm"
-version = "0.2.0"
+version = "0.2.1"
 description = "Simple (stupid) assembler for DP32 processor"
 readme = "README.md"
 requires-python = ">=3.11"
