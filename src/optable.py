@@ -83,18 +83,21 @@ OP_TABLE: dict[str, OpTable] = {
             (LMem, Register): Desc(0x21, Lout.MEMORY, expanded=True),
             (SMem, Register): Desc(0x31, Lout.MEMORY)
             },
+
+        # в методичке не указан опкод для indexed branch, где не задействуется
+        # 32 битное смещение, поэтому в этих местах стоит expanded = True
         "branch": {
             (Condition, I32): Desc(0x40, Lout.BRANCHING, expanded=True),
             (Condition, I8): Desc(0x50, Lout.BRANCHING),
             (Condition, LMem): Desc(0x41, Lout.BRANCHING, expanded=True),
-            (Condition, SMem): Desc(0x41, Lout.BRANCHING),
+            (Condition, SMem): Desc(0x41, Lout.BRANCHING, expanded=True),
             # Объекты условия однозначно представимы в форме
             # 8 битного числа, поэтому я разрешаю его
             # использование вместо объекта `Condition`
             (I8, I32): Desc(0x40, Lout.BRANCHING, expanded=True),
             (I8, I8): Desc(0x50, Lout.BRANCHING),
             (I8, LMem): Desc(0x41, Lout.BRANCHING, expanded=True),
-            (I8, SMem): Desc(0x41, Lout.BRANCHING)
+            (I8, SMem): Desc(0x41, Lout.BRANCHING, expanded=True)
             #? (Condition, SMem): Desc(0x51, Lout.BRANCHING) В описании
             # не указан, поэтому и у меня не будет
             }
