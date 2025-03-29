@@ -1,5 +1,6 @@
 [project]
 name = "dp32-asm"
+authors = [{name="ElectronixTM"}]
 version = "0.2.1"
 description = "Simple (stupid) assembler for DP32 processor"
 readme = "README.md"
@@ -7,6 +8,7 @@ requires-python = ">=3.11"
 dependencies = [
     "sly>=0.5",
 ]
+license = "Apache-2.0"
 
 [dependency-groups]
 dev = [
@@ -20,3 +22,10 @@ testpaths = [
 pythonpath = [
   ".", "src"
 ]
+
+[project.scripts]
+dp32asm = "main:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
