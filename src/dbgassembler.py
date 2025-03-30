@@ -52,7 +52,7 @@ class DebugAssembler(Assembler):
 
         for op in oplist:
             try:
-                instr_start_addr = len(code)
+                instr_start_addr = len(code) // WORD_SIZE
                 code += self._assemble_single_instr(op)
                 if isinstance(op, Operation | RawData):
                     self._dump_instr_info(instr_start_addr, op)
