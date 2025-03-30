@@ -4,8 +4,7 @@
 """
 
 from dataclasses import dataclass, field
-from typing import Any, TypeVar, Callable, Sequence
-from functools import wraps
+from typing import Any, TypeVar, Callable
 
 @dataclass
 class TrackedInfo:
