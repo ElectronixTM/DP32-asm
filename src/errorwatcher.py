@@ -56,8 +56,8 @@ class ErrorWatcher:
         self.tracked_table[id_] = TrackedInfo(lineno, index_, obj)
 
     def get_info_by_object(self, obj: Any):
-        if hasattr(obj, "id_"):
-            return self.tracked_table[obj.id_]
+        if hasattr(obj, "_id"):
+            return self.tracked_table[obj._id]
 
     def get_info_by_id(self, id_: int):
         return self.tracked_table[id_]
