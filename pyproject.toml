@@ -1,7 +1,7 @@
 [project]
 name = "dp32-asm"
 authors = [{name="ElectronixTM"}]
-version = "0.2.1"
+version = "0.2.2"
 description = "Simple (stupid) assembler for DP32 processor"
 readme = "README.md"
 requires-python = ">=3.11"
