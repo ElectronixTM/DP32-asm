@@ -15,6 +15,8 @@ class AssembleFlags(enum.Flag):
     """
     FORCE_EXPAND = enum.auto()
 
+WORD_SIZE = 4
+
 @dataclass
 class Assembler:
     """
@@ -49,7 +51,7 @@ class Assembler:
         for op in oplist:
             try:
                 code += self._assemble_single_instr(op)
-                self._cur_addr = len(code) // 4
+                self._cur_addr = len(code) // WORD_SIZE
             except errorwatcher.TrackedError as e:
                 errors_list.exceptions.append(e)
 
