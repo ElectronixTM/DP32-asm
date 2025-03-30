@@ -84,6 +84,6 @@ class DebugAssembler(Assembler):
         desc = DbgInstrDesc(length=size, srcline=line)
         self._dbg_dict["instructions"][addr] = desc
 
-    def _get_dbg_dict(self) -> DbgDict:
+    def get_dbg_dict(self) -> DbgDict:
         return self._dbg_dict
 
