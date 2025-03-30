@@ -82,7 +82,9 @@ class Assembler:
     def _resolve_identifier(self, id_: Identifier) -> int:
         if not IdFlags.REL_ADDR in id_.flags:
             return self.GAT[id_]
-        return self.GAT[id_] - self._cur_addr - 2
+        if AssembleFlags.FORCE_EXPAND in self._flags:
+            return self.GAT[id_] - self._cur_addr - 2
+        return self.GAT[id_] - self._cur_addr - 1
 
     def _resolve_mem_ptr(self, mem_ptr: MemPtr) -> MemPtr:
         """
