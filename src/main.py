@@ -98,7 +98,6 @@ def main():
     args = parser.parse_args()
 
     with open(args.file, 'r') as f:
-        f._checkClosed
         text = f.read()
     result = None
     asm = None
