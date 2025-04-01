@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
-from abstracts import (Operation, Identifier, Label, Condition,
+from .abstracts import (Operation, Identifier, Label, Condition,
                        Register, MemPtr, RawData, IdFlags)
-import codegenutils
-import optable
-from command import Command, CommandSizes, MAX_FIELD_VAL
+from . import codegenutils
+from . import optable
+from .command import Command, CommandSizes, MAX_FIELD_VAL
 import enum
-from hexutils import tohex
-import errorwatcher
+from .hexutils import tohex
+from . import errorwatcher
 
 class AssembleFlags(enum.Flag):
     """

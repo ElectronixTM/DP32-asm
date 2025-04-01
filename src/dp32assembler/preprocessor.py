@@ -6,7 +6,7 @@
 это просто re.sub)
 """
 from dataclasses import dataclass
-from lexer import DPLexer
+from .lexer import DPLexer
 from sly.lex import Token
 from typing import Iterator, Callable
 

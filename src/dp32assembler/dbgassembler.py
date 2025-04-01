@@ -4,9 +4,9 @@
 """
 
 from dataclasses import dataclass, field
-from assembler import Assembler, WORD_SIZE
-from abstracts import Operation, Label, RawData
-import errorwatcher
+from .assembler import Assembler, WORD_SIZE
+from .abstracts import Operation, Label, RawData
+from . import  errorwatcher
 from typing import TypedDict
 
 class DbgInstrDesc(TypedDict):

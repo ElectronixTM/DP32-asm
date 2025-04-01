@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-from lexer import DPLexer
-from preprocessor import DPPreprocessor
-from parser import DPParser
-from assembler import Assembler
-from dbgassembler import DebugAssembler, DbgDict
-from abstracts import Operation, Label, RawData
+from .lexer import DPLexer
+from .preprocessor import DPPreprocessor
+from .parser import DPParser
+from .assembler import Assembler
+from .dbgassembler import DebugAssembler, DbgDict
+from .abstracts import Operation, Label, RawData
+from .errorwatcher import TrackedErrorsList, TrackedError, ErrorWatcher
 from argparse import ArgumentParser
-from errorwatcher import TrackedErrorsList, TrackedError, ErrorWatcher
 from typing import cast
 import os
 import json

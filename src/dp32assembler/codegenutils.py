@@ -4,9 +4,9 @@
 процессору и не затрагивает диррективы резервирования памяти
 """
 
-from abstracts import Register, Condition, Identifier, MemPtr, RawDataSizes
-import optable
-from command import Command, CommandSizes, MAX_FIELD_VAL, MIN_FIELD_VAL
+from .abstracts import Register, Condition, Identifier, MemPtr, RawDataSizes
+from . import optable
+from .command import Command, CommandSizes, MAX_FIELD_VAL, MIN_FIELD_VAL
 import math
 
 def calc_raw_data_size(raw_data_size: int, data: list[int]) -> int:

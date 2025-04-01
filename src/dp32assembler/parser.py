@@ -1,8 +1,8 @@
 from sly import Parser
-from lexer import DPLexer
-from abstracts import *
+from .lexer import DPLexer
+from .abstracts import *
 from sly.yacc import YaccProduction
-from errorwatcher import ErrorWatcher
+from .errorwatcher import ErrorWatcher
 
 DATA_SIZES_TABLE: dict[str, RawDataSizes] = {
         "db": RawDataSizes.BYTE,

@@ -8,7 +8,7 @@
 from enum import IntEnum
 from dataclasses import dataclass
 from typing import Any
-from hexutils import tohex
+from .hexutils import tohex
 
 class CommandSizes(IntEnum):
     DEFAULT = 32

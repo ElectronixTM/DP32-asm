@@ -6,8 +6,8 @@
 """
 from dataclasses import dataclass
 from enum import IntEnum, auto
-from command import *
-from abstracts import Register, Condition
+from .command import *
+from .abstracts import Register, Condition
 from typing import TypeAlias
 
 # тип данных, который для каждого отдельного типа

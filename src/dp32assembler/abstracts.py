@@ -4,7 +4,7 @@
 """
 from dataclasses import dataclass, field
 from enum import IntFlag, Flag, IntEnum, auto
-import errorwatcher
+from . import errorwatcher
 
 @dataclass(frozen=True)
 class Register:
