@@ -24,7 +24,7 @@ pythonpath = [
 ]
 
 [project.scripts]
-dp32asm = "main:main"
+dp32asm = "dp32assembler.main:main"
 
 [build-system]
 requires = ["setuptools"]
