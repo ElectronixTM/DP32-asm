@@ -1,7 +1,7 @@
 [project]
 name = "dp32-asm"
 authors = [{name="ElectronixTM"}]
-version = "0.2.2"
+version = "0.3.0"
 description = "Simple (stupid) assembler for DP32 processor"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,7 +24,7 @@ pythonpath = [
 ]
 
 [project.scripts]
-dp32asm = "main:main"
+dp32asm = "dp32assembler.main:main"
 
 [build-system]
 requires = ["setuptools"]

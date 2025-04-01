@@ -15,6 +15,8 @@ class AssembleFlags(enum.Flag):
     """
     FORCE_EXPAND = enum.auto()
 
+WORD_SIZE = 4
+
 @dataclass
 class Assembler:
     """
@@ -48,20 +50,8 @@ class Assembler:
 
         for op in oplist:
             try:
-                if isinstance(op, Label):
-                    continue
-                elif isinstance(op, RawData):
-                    op.operands = self._resolve_data_identifiers(op)
-                    if AssembleFlags.FORCE_EXPAND in self._flags and op.size != 32:
-                        raise errorwatcher.TrackedError(
-                                op,
-                                f"Can't fit 32 bits identifier to {op.size} bits"
-                                )
-                    code += codegenutils.handle_raw_data(op.size, op.operands)
-                else:
-                    command = self._assemble_operation(op)
-                    code += command.to_bytearray()
-                self._cur_addr = len(code) // 4
+                code += self._assemble_single_instr(op)
+                self._cur_addr = len(code) // WORD_SIZE
             except errorwatcher.TrackedError as e:
                 errors_list.exceptions.append(e)
 
@@ -78,6 +68,24 @@ class Assembler:
         self.GAT = {}
         self._flags = AssembleFlags(0)
         self._cur_addr = 0
+
+    def _assemble_single_instr(self, op: Operation | Label | RawData) -> bytearray:
+        """
+        Генерирует байты для отдельно взятой инструкции
+        """
+        if isinstance(op, Label):
+            return bytearray()
+        elif isinstance(op, RawData):
+            op.operands = self._resolve_data_identifiers(op)
+            if AssembleFlags.FORCE_EXPAND in self._flags and op.size != 32:
+                raise errorwatcher.TrackedError(
+                        op,
+                        f"Can't fit 32 bits identifier to {op.size} bits"
+                        )
+            return codegenutils.handle_raw_data(op.size, op.operands)
+        else:
+            command = self._assemble_operation(op)
+            return command.to_bytearray()
 
     def _resolve_identifier(self, id_: Identifier) -> int:
         if not IdFlags.REL_ADDR in id_.flags:

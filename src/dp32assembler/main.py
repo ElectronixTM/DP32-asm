@@ -4,9 +4,13 @@ from lexer import DPLexer
 from preprocessor import DPPreprocessor
 from parser import DPParser
 from assembler import Assembler
+from dbgassembler import DebugAssembler, DbgDict
 from abstracts import Operation, Label, RawData
 from argparse import ArgumentParser
 from errorwatcher import TrackedErrorsList, TrackedError, ErrorWatcher
+from typing import cast
+import os
+import json
 
 def report_error(error: TrackedError, source: str):
     error_watcher = ErrorWatcher()
@@ -25,7 +29,10 @@ def report_errors_list(errors: TrackedErrorsList, source: str):
     for error in errors.exceptions:
         report_error(error, source)
 
-def assemble(text: str) -> bytearray:
+def assemble(
+        text: str,
+        assembler: Assembler | None = None
+        ) -> bytearray:
     """
     Assembles file directly to bytecode
     """
@@ -41,8 +48,9 @@ def assemble(text: str) -> bytearray:
         raise ValueError("Syntax analysis failed. Aborting assembling stage")
     assert (isinstance(ast, list)
             and all(isinstance(i, (Operation, Label, RawData)) for i in ast))
-    a = Assembler()
-    return a.assemble(ast)
+    if not assembler:
+        assembler = Assembler()
+    return assembler.assemble(ast)
 
 def bytearray_to_lab(barr: bytearray) -> str:
     """
@@ -76,13 +84,29 @@ def main():
             default="out.bin",
             help="file to store result to"
             )
+    parser.add_argument(
+            "-d",
+            "--debug",
+            action="store_true",
+            help="generate debug information"
+            )
+    parser.add_argument(
+            "--debug-file",
+            default="dbg.json",
+            help="file to store  dbg information into"
+            )
     args = parser.parse_args()
 
     with open(args.file, 'r') as f:
         text = f.read()
     result = None
+    asm = None
+    if args.debug:
+        asm = DebugAssembler()
+    else:
+        asm = Assembler()
     try:
-        result = assemble(text)
+        result = assemble(text, asm)
     except TrackedError as e:
         report_error(e, text)
         print("Couldn't perform assembling due to the error")
@@ -101,6 +125,14 @@ def main():
         out = bytearray_to_lab(result)
         with open(args.output, 'w') as f:
             f.write(out)
+    if not args.debug:
+        return
+
+    assert isinstance(asm, DebugAssembler)
+    dbg = cast(dict, asm.get_dbg_dict())
+    dbg["src"] = os.path.abspath(args.file)
+    with open(args.debug_file, 'w') as f:
+        json.dump(dbg, f, indent=2)
 
 if __name__ == "__main__":
     main()
