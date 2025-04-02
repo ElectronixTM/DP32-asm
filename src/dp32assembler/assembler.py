@@ -301,8 +301,8 @@ class Assembler:
                     )
 
 if __name__ == "__main__":
-    from lexer import DPLexer
-    from parser import DPParser
+    from .lexer import DPLexer
+    from .parser import DPParser
     a = Assembler()
     text = "add r2 2"
     l = DPLexer()
