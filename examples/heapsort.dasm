@@ -1,0 +1,159 @@
+; Это программа была написана для DP32-asm
+; и предоставляется по лицензии WTFPL. С
+; текстом лицензии можно ознакомиться по ссылке
+; https://www.wtfpl.net/txt/copying/
+
+; СОГЛАШЕНИЯ АССЕМБЛЕРА:
+; аргументы функции передаются через регистры,
+; начиная с r255 и спускаются вниз, но не ниже
+; чем r200. регистры с 0 по 99 можно портить
+; в рамках любой подпрограммы. Мусор можно как
+; раз сбрасывать в r99. Регистр 100 всегда
+; хранит ноль все остальные регистры необходимо
+; восстановить перед выходом, если они заторонуты
+
+#define ARR_SIZE 7
+
+f_heapsort:
+  ; for (int i = n / 2 - 1; i >= 0; i--) {
+  ;   heapify(arr, n, i);
+  ; }
+
+  ; i = n/2 - 1
+  ; i: r101 = n/2 - 1
+  add r101 r100 ARR_SIZE
+  div r101 r101 2
+  sub r101 r101 1
+  branch {i=0} rel f_heapsort_for_condition
+
+  f_heapsort_for_loop:
+  ; heapify(arr, n, i)
+  add r255 r100 ARR_SIZE
+  add r254 r100 r101
+  branch {i=0} rel f_heapify
+  f_heapsort_return_from_heapify:
+  ; i--
+  sub r101 r101 1
+  f_heapsort_for_condition:
+  ; i >= 0
+  sub r99 r101 0
+  branch {i=0n} rel f_heapsort_for_loop
+
+  ; update return_addr
+  load r0 [r100 + new_return_addr]
+  store [r100 + return_addr] r0
+
+  ; for (int i = n - 1; i > 0; i--) {
+
+  ;   // Move current root to end
+  ;   int temp = arr[0];
+  ;   arr[0] = arr[i];
+  ;   arr[i] = temp;
+  ;   // Call max heapify on the reduced heap
+  ;   heapify(arr, i, 0);
+  ; }
+
+  ; i: r101 = ARR_SIZE - 1
+  add r101 r100 ARR_SIZE
+  sub r101 r101 1
+  branch {i=0} rel f_heapsort_2_for_condition
+  f_heapsort_2_for_loop:
+  ; int temp = arr[0]
+  load r0 [r100 + tosort]
+  ; arr[0] = arr[i]
+  load r1 [r101 + tosort]
+  store [r100 + tosort] r1
+  ; arr[i] = temp
+  store [r101 + tosort] r0
+  ; heapify(arr, i ,0);
+  add r255 r100 r101
+  add r254 r100 0
+  branch {i=0} rel f_heapify
+  f_heapsort_new_return_from_heapify:
+  ; i--
+  sub r101 r101 1
+  f_heapsort_2_for_condition:
+  ; i > 0
+  sub r99 r101 0
+  branch {i=0nz} rel f_heapsort_2_for_loop
+  branch{i=0} rel end_of_program
+
+
+f_heapify: ; takes r255=n and r254=i
+  ; int largest = i;
+  ; largest: r0 = i
+  add r0 r100 r254
+
+  ; int l = 2 * i + 1;
+  ; l: r1 = 2 *  i + 1
+  add r1 r100 r254
+  mul r1 r1 2
+  add r1 r1 1
+
+  ; int r = 2 * i + 2;
+  ; r: r3 = 2 * i + 2
+  add r3 r100 r1
+  add r3 r3 1
+
+  ; if (l < n && arr[l] > arr[largest]) {
+  ;   largest = l;
+  ; }
+  ; if l < n
+  sub r99 r1 r255
+  branch {i=0n} rel f_heapify_if1_end
+  ; if arr[l] > arr[largest]
+  load r4 [r1 + tosort]
+  load r5 [r0 + tosort]
+  sub r99 r4 r5
+  branch {i=1nz} rel f_heapify_if1_end
+  ; largest = l
+  add r0 r100 r1
+  f_heapify_if1_end:
+
+  ; if (r < n && arr[r] > arr[largest]) {
+  ;   largest = r;
+  ; }
+  ; if r < n
+  sub r99 r3 r255
+  branch {i=0n} rel f_heapify_if2_end
+  ; && arr[r] > arr[largest]
+  load r4 [r3 + tosort]
+  load r5 [r0 + tosort]
+  sub r99 r4 r5
+  branch {i=1nz} rel f_heapify_if2_end
+  ; largest = r
+  add r0 r100 r3
+  f_heapify_if2_end:
+
+  ; if (largest != i) {
+  ;   int temp = arr[i];
+  ;   arr[i] = arr[largest];
+  ;   arr[largest] = temp;
+
+  ;   // Recursively heapify the affected sub-tree
+  ;   heapify(arr, n, largest);
+  ; }
+
+  ; if largest != i
+  sub r99 r0 r254
+  branch {i=1z} rel f_heapify_end
+  ; temp: r4 = arr[i]
+  load r4 [r254 + tosort]
+  ; arr[i] = arr[largest]
+  load r5 [r0 + tosort]
+  store [r254 + tosort] r5
+  ; arr[largest] = temp
+  store [r0 + tosort] r4
+  ; heapify(arr, n, largest)
+  add r255 r100 r255 ; избыточно, но на всякий
+  add r254 r100 r0
+  branch {i=0} rel f_heapify
+  f_heapify_end:
+  load r6 [r100 + return_addr]
+  branch {i=0} [r6]
+
+return_addr: dw f_heapsort_return_from_heapify
+new_return_addr: dw f_heapsort_new_return_from_heapify
+tosort: dw 9 4 3 8 10 2 5
+
+end_of_program:
