@@ -27,17 +27,17 @@ def test_absolute_addr(source, index, expected):
 
 @pytest.mark.parametrize("source,index,expected",
                          [
-                             ("y: load r1 [r1 + rel x] x: store [r2 + x] r1", 1*4, "00000002"),
-                             ("y: load r1 [r1 + rel x] x: store [r2 + rel y] r1", 3*4, "fffffffe"),
+                             ("y: load r1 [r1 + rel x] x: store [r2 + x] r1", 1*4, "00000000"),
+                             ("y: load r1 [r1 + rel x] x: store [r2 + rel y] r1", 3*4, "fffffffc"),
                              ("dw" + " 0" * 12 + " store [r25 + rel x] r2 "
                               "dw" + " 0" * 4 + " x: dw 0xff 0xff",
-                              13*4, "00000005"),
+                              13*4, "00000004"),
                              ("dw 0 0 y: dw 0xff 0xff load r2 [r1 + rel x] "
                               "dw 0 0 0 load r3 [r1 + rel y] dw 0 0 0 x: "
-                              "dw 0 0", 10 * 4, "fffffff9"),
+                              "dw 0 0", 10 * 4, "fffffff7"),
                              ("dw 0 0 y: dw 0xff 0xff load r2 [r1 + rel x] "
                               "dw 0 0 0 load r3 [r1 + rel y] dw 0 0 0 x: "
-                              "dw 0 0", 5 * 4, "0000000a")
+                              "dw 0 0", 5 * 4, "00000008")
                          ]
                          )
 def test_rel_addr(source, index, expected):
