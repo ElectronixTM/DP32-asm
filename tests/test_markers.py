@@ -5,8 +5,8 @@
 на ноль, хоть на 
 """
 import pytest
-from src.abstracts import *
-from src.main import assemble
+from src.dp32assembler.abstracts import *
+from src.dp32assembler.main import assemble
 
 # интересный факт, в этом ассемблере всем давно насрать на пробелы, так что
 # свои тестовые примеры пишутся через пробел

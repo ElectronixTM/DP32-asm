@@ -20,7 +20,7 @@ testpaths = [
   "tests"
 ]
 pythonpath = [
-  ".", "src"
+  ".", "src/dp32assembler"
 ]
 
 [project.scripts]
