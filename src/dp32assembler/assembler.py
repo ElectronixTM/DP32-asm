@@ -3,7 +3,7 @@ from .abstracts import (Operation, Identifier, Label, Condition,
                        Register, MemPtr, RawData, IdFlags)
 from . import codegenutils
 from . import optable
-from .command import Command, CommandSizes, MAX_FIELD_VAL
+from .command import Command, CommandSizes
 import enum
 from .hexutils import tohex
 from . import errorwatcher
@@ -76,7 +76,16 @@ class Assembler:
         if isinstance(op, Label):
             return bytearray()
         elif isinstance(op, RawData):
-            op.operands = self._resolve_data_identifiers(op)
+            try:
+                op.operands = self._resolve_data_identifiers(op)
+            except KeyError as e:
+                id_name = (e.args[0].name
+                           if isinstance(e.args[0], Identifier)
+                           else "")
+                raise errorwatcher.TrackedError(
+                        failed_on=op,
+                        msg=f"Error while trying to resolve identifier \"{id_name}\""
+                        )
             if AssembleFlags.FORCE_EXPAND in self._flags and op.size != 32:
                 raise errorwatcher.TrackedError(
                         op,
@@ -228,7 +237,11 @@ class Assembler:
                 self._flags |= AssembleFlags.FORCE_EXPAND
             return self._codegen_branch_op(opdesc.opcode, operands)
         else:
-            raise ValueError("Unknown layout encountered")
+            raise errorwatcher.TrackedError(
+                    failed_on=operation,
+                    msg=f"Instruction \"{operation.mnemonic}\" with unknown "
+                         "layout and assembling rules encountered"
+                    )
 
     def _get_op_desc(self, op: Operation) -> optable.OpcodeDescription:
         error = None
