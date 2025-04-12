@@ -97,7 +97,7 @@ def main():
             )
     args = parser.parse_args()
 
-    with open(args.file, 'r') as f:
+    with open(args.file, 'r', encoding="utf8") as f:
         text = f.read()
     result = None
     asm = None
@@ -124,7 +124,7 @@ def main():
             f.write(result)
     elif args.format == "lab":
         out = bytearray_to_lab(result)
-        with open(args.output, 'w') as f:
+        with open(args.output, 'w', encoding="utf8") as f:
             f.write(out)
     if not args.debug:
         return
