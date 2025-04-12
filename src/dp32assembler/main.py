@@ -116,6 +116,7 @@ def main():
         print("Couldn't perform assembling due to listed errors")
         return
     except Exception as e:
+        print("Unexpected unchecked error occured while assebling:")
         print(e)
         return
     if args.format == "bin":
