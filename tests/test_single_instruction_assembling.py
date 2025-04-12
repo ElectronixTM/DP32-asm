@@ -6,8 +6,8 @@
 отдельных частей команды в поля
 """
 import pytest
-from src.abstracts import *
-from src.main import assemble
+from src.dp32assembler.abstracts import *
+from src.dp32assembler.main import assemble
 
 @pytest.mark.parametrize("instr,expected",
                          [
